@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public abstract class BasicAgent {
+public class BasicAgent {
 
     //TODO: make private
 
@@ -21,22 +21,24 @@ public abstract class BasicAgent {
 
     //TODO: implement strategy & verbose!
     public BasicAgent(char[][] board, int strategy, boolean verbose) {
-        getKnowledgeBase();
         this.strategy = strategy;
         this.verbose = verbose;
         game = new Game(board);
         probed = new ArrayList();
         mines = new ArrayList<>();
+        getKnowledgeBase();
         probe();
     }
 
     private void getKnowledgeBase() {
+        System.out.println("inside");
         blocked = game.getBlockedCells();
         topLeft = game.getTopLeftCell();
         centreCell = game.getCentreOfBoardCell();
         numberOfMines = game.getTotalNumberMines();
         rowSize = game.getBoardRowSize();
         columnSize = game.getBoardColumnSize();
+        knownWorld = new char[rowSize][columnSize];
         initialiseAgentWorld();
     }
 

@@ -6,20 +6,50 @@ public class Game {
 
     public Game(char[][] boardIn) {
         this.board = new Cell[boardIn.length][boardIn[0].length];
+//        System.out.println("game in" + board.length +" [] "+board[0].length);
         createAllCellsInBoard(boardIn);
     }
 
     /**
      * Create a cell for each coordinate/place in the map.
      */
-    private void createAllCellsInBoard(char[][] board) {
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[0].length; j++) {
-                char value = board[i][j]; // get value.
+    private void createAllCellsInBoard(char[][] boardIn) {
+        for (int i = 0; i < boardIn.length; i++) {
+            for (int j = 0; j < boardIn[0].length; j++) {
+                char value = boardIn[i][j]; // get value.
                 this.board[i][j] = new Cell(i, j, value); // Create a new cell at the board's coordinate with the value.
             }
         }
+//        printMap();
     }
+
+//    /**
+//     * Prints the agent's world.
+//     */
+//    public void printMap() {
+//        System.out.println();
+//        // first line
+//        System.out.print("    ");
+//        for (int j = 0; j < board[0].length; j++) {
+//            System.out.print(j + " "); // x indexes
+//        }
+//        System.out.println();
+//        // second line
+//        System.out.print("    ");
+//        for (int j = 0; j < board[0].length; j++) {
+//            System.out.print("- ");// separator
+//        }
+//        System.out.println();
+//        // the board
+//        for (int i = 0; i < board.length; i++) {
+//            System.out.print(" "+ i + "| ");// index+separator
+//            for (int j = 0; j < board[0].length; j++) {
+//                System.out.print(board[i][j].getValue() + " ");// value in the board
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
+//    }
 
     public int getBoardRowSize() {
         return board.length;

@@ -25,6 +25,7 @@ public class A2main {
 		switch (args[0]) {
 		case "P1":
 			//TODO: Part 1
+			BasicAgent basicAgent = new BasicAgent(board, 1, false);
 		case "P2":
 			//TODO: Part 2
 		case "P3":
