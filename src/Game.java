@@ -29,6 +29,10 @@ public class Game {
         return board[0].length;
     }
 
+    /**
+     * Get the total number of mines.
+     * @return
+     */
     public int getTotalNumberMines() {
         int totalNumberMines = 0;
 
@@ -44,6 +48,10 @@ public class Game {
         return totalNumberMines;
     }
 
+    /**
+     * Get the cells that are blocked.
+     * @return
+     */
     public ArrayList<Cell> getBlockedCells() {
         ArrayList<Cell> blockedCells = new ArrayList<>();
 
@@ -71,8 +79,27 @@ public class Game {
         return board[0][0];
     }
 
-//    public boolean gameWon() {
-//
-//    }
+    public Cell getCell(int r, int c) {
+        return board[r][c];
+    }
+
+    public boolean isGameWon(int numberProbed) {
+        int numberBlocked = getBlockedCells().size();
+        int numberCellsInBoard = getBoardRowSize() * getBoardColumnSize();
+
+        // if the number of cells probed plus number of blocked + the total number of mines
+        // is equal to the number of cells in the board, then it means that the agent won
+        // as they uncovered every cell that is not a mine.
+        if ((numberProbed + numberBlocked + getTotalNumberMines()) == numberCellsInBoard) {
+            return true;
+        }
+        return false;
+    }
+
+    public void foundMine() {
+       // TODO: FIX! change words
+        System.out.println("LOST!");
+        System.exit(0);
+    }
 
 }

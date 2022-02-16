@@ -3,24 +3,29 @@ import java.util.Objects;
 public class Cell {
 
     // Initialise variables.
-    private int x, y;
+    private int r, c;
     private char value;
     private boolean blocked, mine;
 
+    public Cell(int r, int c) {
+        this.r = r;
+        this.c = c;
+    }
+
     /**
      * Create a new cell on the board.
-     * @param x the x coordinate of the cell.
-     * @param y the y coordinate of the cell.
+     * @param r the x coordinate of the cell.
+     * @param c the y coordinate of the cell.
      * @param value the value of the cell.
      */
-    public Cell(int x, int y, char value) {
-        this.x = x;
-        this.y = y;
+    public Cell(int r, int c, char value) {
+        this.r = r;
+        this.c = c;
         this.value = value;
         setCellType(value); // det
     }
 
-    private void setCellType(char value) {
+    public void setCellType(char value) {
         switch (value) {
             case 'm':
                 // Cell contains mine.
@@ -57,16 +62,16 @@ public class Cell {
      * Get x coordinate of the cell.
      * @return x coordinate.
      */
-    public int getX() {
-        return x;
+    public int getR() {
+        return r;
     }
 
     /**
      * Get y coordinate of the cell.
      * @return y coordinate.
      */
-    public int getY() {
-        return y;
+    public int getC() {
+        return c;
     }
 
     /**
@@ -83,11 +88,11 @@ public class Cell {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Cell cell = (Cell) o;
-        return x == cell.x && y == cell.y;
+        return r == cell.r && c == cell.c;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(r, c);
     }
 }
