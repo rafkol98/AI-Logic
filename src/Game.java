@@ -127,8 +127,7 @@ public class Game {
     }
 
     public void foundMine() {
-       // TODO: FIX! change words
-        System.out.println("LOST!");
+        System.out.println("Result: Agent dead: found mine");
         System.exit(0);
     }
 

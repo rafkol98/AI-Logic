@@ -2,14 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad454717-b5b7-4e2a-9326-345b0313ed24" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/A2main.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/BasicAgent.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Cell.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Game.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/World.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/A2main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/A2main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BasicAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/BasicAgent.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BasicAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BasicAgent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Game.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/Game.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Game.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
