@@ -8,7 +8,7 @@ public abstract class Agent {
     private boolean verbose;
     private int strategy;
 
-    private char[][] knownWorld;
+    private Cell[][] knownWorld;
     private ArrayList<Cell> blocked; // the agent must know the blocked cells.
     private Cell topLeft;
     private Cell centreCell;
@@ -19,7 +19,7 @@ public abstract class Agent {
 
     private int rowSize, columnSize;
 
-    public char[][] getKnownWorld() {
+    public Cell[][] getKnownWorld() {
         return knownWorld;
     }
 
@@ -52,7 +52,7 @@ public abstract class Agent {
         numberOfMines = game.getTotalNumberMines();
         rowSize = game.getBoardRowSize();
         columnSize = game.getBoardColumnSize();
-        knownWorld = new char[rowSize][columnSize];
+        knownWorld = new Cell[rowSize][columnSize];
         initialiseAgentWorld();
     }
 
@@ -75,17 +75,17 @@ public abstract class Agent {
 
                 // if the probed cell is a mine, then the agent lost.
                 if (probedCell.isMine()) {
-                    knownWorld[probedCell.getR()][probedCell.getC()] = '-';
+                    knownWorld[probedCell.getR()][probedCell.getC()].setValue('-');
                     printFinal(false);
                 } else {
                     // if the value of the probed cell is 0, then uncover adjacent cells.
                     if (probedCell.getValue() == '0') {
-                        knownWorld[probedCell.getR()][probedCell.getC()] = probedCell.getValue(); // uncover cell.
+                        knownWorld[probedCell.getR()][probedCell.getC()].setValue(probedCell.getValue()); // uncover cell.
                         uncoverAdjacentCells(r, c);  // Uncover adjacent cells.
                     }
                     // Uncover the value of the probed cell (agent knows the value).
                     else {
-                        knownWorld[probedCell.getR()][probedCell.getC()] = probedCell.getValue();
+                        knownWorld[probedCell.getR()][probedCell.getC()].setValue(probedCell.getValue());
                     }
                 }
             }
@@ -124,10 +124,10 @@ public abstract class Agent {
                 // check if the current cell is known to be blocked.
                 if (containInList(r,c,blocked)) {
                     // set the value of char in r,c to b.
-                    knownWorld[r][c] = 'b';
+                    knownWorld[r][c] = new Cell(r,c,'b');
                 } else {
-                    // set the value of char in r,c to ?.
-                    knownWorld[r][c] = '?';
+                    // set the value of cell in r,c to ?.
+                    knownWorld[r][c] = new Cell(r,c,'?');
                 }
             }
         }
@@ -157,7 +157,7 @@ public abstract class Agent {
             for (int i = 0; i < knownWorld.length; i++) {
                 System.out.print(" " + i + "| ");// index+separator
                 for (int j = 0; j < knownWorld[0].length; j++) {
-                    System.out.print(knownWorld[i][j] + " ");// value in the board
+                    System.out.print(knownWorld[i][j].getValue() + " ");// value in the board
                 }
                 System.out.println();
             }

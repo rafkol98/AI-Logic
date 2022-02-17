@@ -82,6 +82,9 @@ public class Cell {
         return value;
     }
 
+    public void setValue(char value) {
+        this.value = value;
+    }
 
     @Override
     public boolean equals(Object o) {
