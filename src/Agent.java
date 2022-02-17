@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public abstract class Agent {
 
-    //TODO: make private
+    //TODO: FIX COMMENTS!
 
     private Game game;
     private boolean verbose;
@@ -14,8 +14,7 @@ public abstract class Agent {
     private Cell centreCell;
     private int numberOfMines;
 
-    private ArrayList<Cell> probed;
-    private ArrayList<Cell> mines;
+    private ArrayList<Cell> probed, markedMines;
 
     private int rowSize, columnSize;
 
@@ -27,17 +26,28 @@ public abstract class Agent {
         return probed;
     }
 
+    public ArrayList<Cell> getMarkedMines() {
+        return markedMines;
+    }
+
     public Game getGame() {
         return game;
     }
 
+    public int getRowSize() {
+        return rowSize;
+    }
+
+    public int getColumnSize() {
+        return columnSize;
+    }
 
     public Agent(char[][] board, int strategy, boolean verbose) {
         this.strategy = strategy;
         this.verbose = verbose;
         game = new Game(board);
         probed = new ArrayList<>();
-        mines = new ArrayList<>();
+        markedMines = new ArrayList<>();
         getKnowledgeBase();
         probe();
     }
@@ -66,7 +76,7 @@ public abstract class Agent {
      */
     public void uncover(int r, int c) {
         // uncover only cells that are within the board's borders.
-        if (r >= 0 && r < rowSize && c >= 0 && c < rowSize) {
+        if (r >= 0 && r < rowSize && c >= 0 && c < columnSize) {
             // Ask game about the value of the same coordinates but from real board.
             Cell probedCell = game.getCell(r, c);
             // if the probed cell is not a blocked cell and was not already probed, then proceed to uncover it to the agent.
@@ -123,7 +133,7 @@ public abstract class Agent {
             for (int c = 0; c < columnSize; c++) {
                 // check if the current cell is known to be blocked.
                 if (containInList(r,c,blocked)) {
-                    // set the value of char in r,c to b.
+                    // set the value of cell in r,c to b.
                     knownWorld[r][c] = new Cell(r,c,'b');
                 } else {
                     // set the value of cell in r,c to ?.

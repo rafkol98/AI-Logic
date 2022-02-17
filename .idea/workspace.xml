@@ -2,15 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad454717-b5b7-4e2a-9326-345b0313ed24" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/BeginnerAgent.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/BeginnerAgent.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Agent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BasicAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/BasicAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BasicAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BasicAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Cell.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/Cell.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Cell.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Cell.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BeginnerAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/BeginnerAgent.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BeginnerAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BeginnerAgent.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
