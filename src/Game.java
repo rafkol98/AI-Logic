@@ -20,36 +20,7 @@ public class Game {
                 this.board[i][j] = new Cell(i, j, value); // Create a new cell at the board's coordinate with the value.
             }
         }
-//        printMap();
     }
-
-//    /**
-//     * Prints the agent's world.
-//     */
-//    public void printMap() {
-//        System.out.println();
-//        // first line
-//        System.out.print("    ");
-//        for (int j = 0; j < board[0].length; j++) {
-//            System.out.print(j + " "); // x indexes
-//        }
-//        System.out.println();
-//        // second line
-//        System.out.print("    ");
-//        for (int j = 0; j < board[0].length; j++) {
-//            System.out.print("- ");// separator
-//        }
-//        System.out.println();
-//        // the board
-//        for (int i = 0; i < board.length; i++) {
-//            System.out.print(" "+ i + "| ");// index+separator
-//            for (int j = 0; j < board[0].length; j++) {
-//                System.out.print(board[i][j].getValue() + " ");// value in the board
-//            }
-//            System.out.println();
-//        }
-//        System.out.println();
-//    }
 
     public int getBoardRowSize() {
         return board.length;
@@ -124,11 +95,6 @@ public class Game {
             return true;
         }
         return false;
-    }
-
-    public void foundMine() {
-        System.out.println("Result: Agent dead: found mine");
-        System.exit(0);
     }
 
 }

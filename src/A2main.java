@@ -1,7 +1,3 @@
-
-
-import java.util.ArrayList;
-
 public class A2main {
 
 	public static void main(String[] args) {
@@ -21,11 +17,10 @@ public class A2main {
 		printBoard(board);
 		System.out.println("Start!");
 
-
+		Agent agent;
 		switch (args[0]) {
 		case "P1":
-			//TODO: Part 1
-			BasicAgent basicAgent = new BasicAgent(board, 1, false);
+			agent = new BasicAgent(board, 1, verbose);
 		case "P2":
 			//TODO: Part 2
 		case "P3":
