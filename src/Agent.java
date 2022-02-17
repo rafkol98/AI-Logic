@@ -79,10 +79,14 @@ public abstract class Agent {
         if (r >= 0 && r < rowSize && c >= 0 && c < columnSize) {
             // Ask game about the value of the same coordinates but from real board.
             Cell probedCell = game.getCell(r, c);
+
+            System.out.println("mesa sto uncover " +r + " ,, "+c);
+
             // if the probed cell is not a blocked cell and was not already probed, then proceed to uncover it to the agent.
             if (!blocked.contains(probedCell) && !probed.contains(probedCell)) {
                 probed.add(probedCell); // add the cell to the probed list.
 
+                System.out.println("mesa sto uncover " +r + " ,, "+c);
                 // if the probed cell is a mine, then the agent lost.
                 if (probedCell.isMine()) {
                     knownWorld[probedCell.getR()][probedCell.getC()].setValue('-');
@@ -123,8 +127,9 @@ public abstract class Agent {
     }
 
     //TODO: flag cell when thinking mine is found.
-    private void flagCell(Cell cell) {
-
+    public void flagCell(int r, int c) {
+        knownWorld[r][c].setValue('*');
+        markedMines.add(knownWorld[r][c]);
     }
 
     public void initialiseAgentWorld() {

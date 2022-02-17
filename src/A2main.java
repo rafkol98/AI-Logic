@@ -23,6 +23,7 @@ public class A2main {
 			agent = new BasicAgent(board, 1, verbose);
 		case "P2":
 			//TODO: Part 2
+			agent = new BeginnerAgent(board, 1, verbose);
 		case "P3":
 			//TODO: Part 3
 		case "P4":
