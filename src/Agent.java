@@ -127,9 +127,11 @@ public abstract class Agent {
     }
 
     //TODO: flag cell when thinking mine is found.
-    public void flagCell(int r, int c) {
-        knownWorld[r][c].setValue('*');
-        markedMines.add(knownWorld[r][c]);
+    public void markCell(int r, int c) {
+        if (knownWorld[r][c].getValue() != 'b' && getProbed().contains(knownWorld[r][c])) {
+            knownWorld[r][c].setValue('*');
+            markedMines.add(knownWorld[r][c]);
+        }
     }
 
     public void initialiseAgentWorld() {

@@ -9,72 +9,82 @@ public class BeginnerAgent extends Agent {
     @Override
     public void probe() {
         // SINGLE POINT STRATEGY.
+        uncover(0,0);
         printAgentKnownWorld(false);
-
+//        System.out.println("probed: "+getProbed().size());
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                // if cell is covered check its adjacent neighbours.
+                System.out.println("mesa sto probe" + r+","+c);
+                // if cell is covered (not probed) check its adjacent neighbours.
                 if (!getProbed().contains(getKnownWorld()[r][c])) {
                     action(r, c);
                 }
-
-//                if (getGame().isGameWon(getProbed().size())) {
-//                    printFinal(true);
-//                } else {
-//                    printAgentKnownWorld(false);
-//                }
             }
         }
     }
 
     public void action(int r, int c) {
+        System.out.println(r+"---"+c);
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
-            if (!getProbed().contains(neighbour) || getMarkedMines().contains(neighbour)) {
-                System.out.println("MESA SS "+ neighbour.getR() +" .. " +neighbour.getC() );
+//            if (!getProbed().contains(neighbour) || getMarkedMines().contains(neighbour)) {
+                System.out.println("neighbour: "+neighbour.getR() + ", "+ neighbour.getC());
                 // if it is safe, then uncover cell.
                 if(allFreeNeighbours(neighbour)) {
-//                    System.out.println("M");
                     uncover(r, c); // uncover cell.
+                    printAgentKnownWorld(false);
                 } else if (allMarkedNeighbours(neighbour)){
-                    flagCell(r, c);
+                    markCell(r, c);
+                    printAgentKnownWorld(false);
                 }
-            }
+//            }
         }
     }
 
     private boolean allFreeNeighbours(Cell cell) {
         int minesCount = 0;
+
+//        System.out.println(cell.getR()+" , "+cell.getC());
         ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.
+        System.out.println("Neighbours: "+neighboursOfCell.size()+"\n");
         for (Cell neighbour : neighboursOfCell) {
             if (neighbour.getValue() == '*') {
                 minesCount++;
             }
         }
-        System.out.println("AFN: mines count" + minesCount +"cell value:" +cell.getValue());
+//        System.out.println("AFN: mines count" + minesCount +"cell value:" +cell.getValue());
 
         return  (cell.getValue() == minesCount);
     }
 
     private boolean allMarkedNeighbours(Cell cell) {
-        int minesCount = 0;
-        int unmarkedCount = 0;
-        ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.
+        if (cell.getValue() != 'b' && cell.getValue() != '?' && cell.getValue() != '*') {
+            int minesCount = 0;
+            int unmarkedCount = 0;
+            int unprobed = 0;
+            //find number of unprobed.
 
-        for (Cell neighbour : neighboursOfCell) {
-            if (neighbour.getValue() == '*') {
-                minesCount++;
-            }
+            ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.
 
-            if (neighbour.getValue() == '?') {
-                unmarkedCount++;
+            for (Cell neighbour : neighboursOfCell) {
+                if (neighbour.getValue() == '*') {
+                    minesCount++;
+                } else if (neighbour.getValue() == '?') {
+                    unmarkedCount++;
+                }
             }
+//
+//            try {
+//
+//            }
+            int a = Integer.parseInt(String.valueOf(cell.getValue()));
+            System.out.println(cell.getR() + " ,, " + cell.getC() + "AMN" + unmarkedCount + " == " + cell.getValue() + " - " + minesCount);
+            return (unmarkedCount + unprobed == a - minesCount);
         }
-
-        System.out.println("AMN"+unmarkedCount + " == "+ cell.getValue() + " - "+ minesCount);
-        return (unmarkedCount == cell.getValue() - minesCount);
+        return false;
     }
+
 
     public ArrayList<Cell> getAdjacentNeighbours(int r, int c) {
         ArrayList<Cell> neighbours = new ArrayList<>();
