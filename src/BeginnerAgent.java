@@ -13,6 +13,7 @@ public class BeginnerAgent extends Agent {
         uncover(getCentreCell().getR(), getCentreCell().getC());
 
         printAgentKnownWorld(false);
+        
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // if cell is covered check its adjacent neighbours.
@@ -20,7 +21,7 @@ public class BeginnerAgent extends Agent {
                     action(r, c);
                 }
 
-                System.out.println(getUncovered());
+//                System.out.println(getUncovered());
                 if (getGame().isGameWon(getUncovered().size(),getMarkedMines().size())) {
                     printFinal(1);
                 }
@@ -52,6 +53,7 @@ public class BeginnerAgent extends Agent {
     }
 
     private boolean allFreeNeighbours(Cell cell) {
+        System.out.println("NEIGHBOUR --- AFN:"+cell.getR()+" , "+cell.getC());
         int minesCount = 0;
 
         ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.
@@ -60,8 +62,8 @@ public class BeginnerAgent extends Agent {
                 minesCount++;
             }
         }
-
-        return (cell.getValue() == minesCount);
+        int clue = Integer.parseInt(String.valueOf(cell.getValue()));
+        return (clue == minesCount);
     }
 
 
