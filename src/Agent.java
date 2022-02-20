@@ -14,7 +14,7 @@ public abstract class Agent {
     private Cell centreCell;
     private int numberOfMines;
 
-    private ArrayList<Cell> probed, markedMines;
+    private ArrayList<Cell> uncovered, markedMines;
 
     private int rowSize, columnSize;
 
@@ -22,8 +22,8 @@ public abstract class Agent {
         return knownWorld;
     }
 
-    public ArrayList<Cell> getProbed() {
-        return probed;
+    public ArrayList<Cell> getUncovered() {
+        return uncovered;
     }
 
     public ArrayList<Cell> getMarkedMines() {
@@ -42,11 +42,19 @@ public abstract class Agent {
         return columnSize;
     }
 
+    public ArrayList<Cell> getBlocked() {
+        return blocked;
+    }
+
+    public Cell getCentreCell() {
+        return centreCell;
+    }
+
     public Agent(char[][] board, int strategy, boolean verbose) {
         this.strategy = strategy;
         this.verbose = verbose;
         game = new Game(board);
-        probed = new ArrayList<>();
+        uncovered = new ArrayList<>();
         markedMines = new ArrayList<>();
         getKnowledgeBase();
         probe();
@@ -80,17 +88,17 @@ public abstract class Agent {
             // Ask game about the value of the same coordinates but from real board.
             Cell probedCell = game.getCell(r, c);
 
-            System.out.println("mesa sto uncover " +r + " ,, "+c);
+//            System.out.println("mesa sto uncover " +r + " ,, "+c);
 
             // if the probed cell is not a blocked cell and was not already probed, then proceed to uncover it to the agent.
-            if (!blocked.contains(probedCell) && !probed.contains(probedCell)) {
-                probed.add(probedCell); // add the cell to the probed list.
+            if (!blocked.contains(probedCell) && !uncovered.contains(probedCell)) {
+                uncovered.add(probedCell); // add the cell to the probed list.
 
-                System.out.println("mesa sto uncover " +r + " ,, "+c);
+//                System.out.println("mesa sto uncover " +r + " ,, "+c);
                 // if the probed cell is a mine, then the agent lost.
                 if (probedCell.isMine()) {
                     knownWorld[probedCell.getR()][probedCell.getC()].setValue('-');
-                    printFinal(false);
+                    printFinal(-1);
                 } else {
                     // if the value of the probed cell is 0, then uncover adjacent cells.
                     if (probedCell.getValue() == '0') {
@@ -128,10 +136,10 @@ public abstract class Agent {
 
     //TODO: flag cell when thinking mine is found.
     public void markCell(int r, int c) {
-        if (knownWorld[r][c].getValue() != 'b' && getProbed().contains(knownWorld[r][c])) {
+//        if (knownWorld[r][c].getValue() != 'b' && getUncovered().contains(knownWorld[r][c])) {
             knownWorld[r][c].setValue('*');
             markedMines.add(knownWorld[r][c]);
-        }
+//        }
     }
 
     public void initialiseAgentWorld() {
@@ -198,15 +206,17 @@ public abstract class Agent {
 
     /**
      * Used to print the final output.
-     * @param won flag to determine whether the agent won or lost.
+     * @param status flag to determine whether the agent won, lost or terminated.
      */
-    public void printFinal(boolean won) {
+    public void printFinal(int status) {
         System.out.println("Final map");
         printAgentKnownWorld(true);
-        if (won) {
+        if (status == 1) {
             System.out.println("Result: Agent alive: all solved");
-        } else {
+        } else if (status == -1){
             System.out.println("Result: Agent dead: found mine");
+        } else if (status == 0) {
+            System.out.println("Result: Agent not terminated");
         }
 
         System.exit(0);

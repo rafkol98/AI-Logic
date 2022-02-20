@@ -84,16 +84,19 @@ public class Game {
         return board[r][c];
     }
 
-    public boolean isGameWon(int numberProbed) {
+    public boolean isGameWon(int numberProbed, int markedMines) {
         int numberBlocked = getBlockedCells().size();
         int numberCellsInBoard = getBoardRowSize() * getBoardColumnSize();
 
+        if (markedMines == getTotalNumberMines()) {
+            if ((numberProbed + numberBlocked + markedMines) == numberCellsInBoard) {
+                return true;
+            }
+        }
         // if the number of cells probed plus number of blocked + the total number of mines
         // is equal to the number of cells in the board, then it means that the agent won
         // as they uncovered every cell that is not a mine.
-        if ((numberProbed + numberBlocked + getTotalNumberMines()) == numberCellsInBoard) {
-            return true;
-        }
+
         return false;
     }
 
