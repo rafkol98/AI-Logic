@@ -6,6 +6,7 @@ public class BeginnerAgent extends Agent {
         super(board, strategy, verbose);
     }
 
+    //TODO: have to go back in the loop at 3,0 TESTME
     @Override
     public void probe() {
         // SINGLE POINT STRATEGY.
@@ -13,23 +14,28 @@ public class BeginnerAgent extends Agent {
         uncover(getCentreCell().getR(), getCentreCell().getC());
 
         printAgentKnownWorld(false);
-        
+
+        loop();
+
+//        printFinal(0);
+    }
+
+    public void loop() {
+        System.out.println("LOOP CALLED");
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // if cell is covered check its adjacent neighbours.
-                if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c])) {
+                if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
                     action(r, c);
                 }
 
-//                System.out.println(getUncovered());
-                if (getGame().isGameWon(getUncovered().size(),getMarkedMines().size())) {
-                    printFinal(1);
-                }
+//                if (getGame().isGameWon(getUncovered().size(),getMarkedMines().size())) {
+//                    printFinal(1);
+//                }
             }
         }
-
-        printFinal(0);
     }
+
 
     public void action(int r, int c) {
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
@@ -42,6 +48,7 @@ public class BeginnerAgent extends Agent {
                     System.out.println("UNCOVER" +r +" "+ c);
                     uncover(r, c); // uncover cell.
                     printAgentKnownWorld(false);
+                    loop();
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
                     markCell(r, c);
