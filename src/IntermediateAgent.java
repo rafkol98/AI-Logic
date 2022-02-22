@@ -6,9 +6,6 @@ public class IntermediateAgent extends BasicAgent {
 //    public class IntermediateAgent extends BeginnerAgent {
 
     protected final FormulaFactory f = new FormulaFactory();
-    private final String NOT = "~";
-    private final String AND = "&";
-    private final String OR = "|";
 
     public IntermediateAgent(char[][] board, int strategy, boolean verbose) {
         super(board, strategy, verbose);
@@ -32,11 +29,11 @@ public class IntermediateAgent extends BasicAgent {
     }
 
 
-    public void allLogicOptions(ArrayList<Cell> cells) {
+    public void createKBU(ArrayList<Cell> cells) {
         ArrayList<String> logicOptions = new ArrayList<>();
 
         for (Cell cell : cells) {
-
+            logicOptions.add(getLogicOptions(cell));
         }
 
     }
@@ -50,28 +47,71 @@ public class IntermediateAgent extends BasicAgent {
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC());
 
         // Unmarked mines = clue - numberOfMarkedMines.
-        int unmarkedMines = cell.getValue() - numberOfMarkedMinesNeighbours;
+        int remainingMines = cell.getValue() - numberOfMarkedMinesNeighbours;
 
-        for (int i=0; i<coveredNeighbours.size(); i++) {
-            //TODO: have to make a power set containing all options.
-//            logicOptions +=
+        ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
+
+        if (minesPosSets.size() > 0) {
+            logicOptions += "(";
+            String andInner = " & ";
+            String connectOptions = " | (";
+
+            for (int i = 0; i < minesPosSets.size(); i++) {
+                if (i != 0) {
+                    logicOptions += connectOptions;
+                }
+                for (int x = 0; x < coveredNeighbours.size(); x++) {
+                    Cell neighbour = coveredNeighbours.get(x);
+                    if (x != 0) {
+                        logicOptions += andInner;
+                    }
+                    if (!minesPosSets.get(i).contains(neighbour)) {
+                        logicOptions += "~";
+                    }
+                    logicOptions += "M" + neighbour.getR() + neighbour.getC();
+                }
+                logicOptions += ")";
+            }
         }
 
         return logicOptions;
     }
 
 
-//    KNOWLEDGE BASE ONLY FOR THE DANGER WORLDS.
-//    NEW KNOWLEDGE BASE EVERY TIME WE ARE TRYING TO UNCOVER SOMETHING
+    public static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
+        ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
 
-    /**
-     * Add in the knowledge base only cells that are not Blocked and do not contain mines.
-     */
-    public void createKBU() {
-        String KBU = "";
+        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
 
+        return possibleMinesSets;
+    }
 
+    public static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
+        ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
+        if (coveredNeighbours.isEmpty()) {
+            System.out.println("mesa");
+            sets.add(new ArrayList<Cell>());
+            return sets;
+        }
 
+        fillInnerSets(sets,coveredNeighbours);
+
+        return sets;
+    }
+
+    public static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
+        Cell top = coveredNeighbours.get(0);
+        ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
+
+        for (ArrayList<Cell> set : permutations(remaining)) {
+            ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
+
+            innerSet.add(top); // add the top.
+            innerSet.addAll(set); // add all elements of the permutations.
+
+            sets.add(innerSet); // add
+            sets.add(set);
+        }
     }
 
     public void proveMine() {
@@ -92,7 +132,7 @@ public class IntermediateAgent extends BasicAgent {
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // check if the cell has at least one covered neighbour and is uncovered.
-                if(coveredNeighbourExists(r,c) && getUncovered().contains(getKnownWorld()[r][c])) {
+                if(getOnlyCoveredNeighbours(r,c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
                     cells.add(getKnownWorld()[r][c]); // cell is suitable.
                 }
             }
@@ -101,19 +141,8 @@ public class IntermediateAgent extends BasicAgent {
         return cells;
     }
 
-    private boolean coveredNeighbourExists(int r, int c) {
-        ArrayList<Cell> neighbours = getAdjacentNeighbours(r,c);
-        for (Cell neighbour : neighbours) {
-            // check if
-            if (isCellCovered(neighbour)) {
-                return true;
-            }
-        }
 
-        return false;
-    }
-
-
+    //TODO: move them to AGENT class.
     public ArrayList<Cell> getOnlyCoveredNeighbours(int r, int c) {
         ArrayList<Cell> coveredNeighbours = new ArrayList<>();
 
@@ -147,18 +176,6 @@ public class IntermediateAgent extends BasicAgent {
     }
 
 
-    //plays the game using the satisfiability test reasoning strategy (SATS) from lectures,
-    // in ADDITION to the SPS
-
-    //prove that a cell is clear (NO MINE) in given coordinates (x,y) by proving KB ^ Dx,y is FALSE.
-
-    // AGENT ABLE TO TRANSFORM ITS CURRENTKNOWNWORLD INTO A LOGIC SENTENCE. USE DNF ENCODING TECHNIQUE.
-
-    // USE SATISFIABILITY RESULTS TO SELECT NEXT MOVE
-
-    // THE LIBRARY LOGICNG SHOULD BE USED TO PROVE THAT A GIVEN CELL DOES OR DOES NOT CONTAIN A MINE.
-
-    // STOP WHEN NO OTHER DEDUCTION COULD BE MADE.
 
 
 }
