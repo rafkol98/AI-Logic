@@ -6,49 +6,58 @@ public class BeginnerAgent extends Agent {
         super(board, strategy, verbose);
     }
 
-    //TODO: have to go back in the loop at 3,0 TESTME
+    /**
+     * Probe cells using the Single Point Strategy.
+     */
     @Override
     public void probe() {
-        // SINGLE POINT STRATEGY.
+        // Uncover safe cells (0,0) and centred cell.
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
 
-        printAgentKnownWorld(false);
+        printAgentKnownWorld(false); // print the known world by the agent.
 
-        loop();
-
-//        printFinal(0);
+        loop(); //
     }
 
+    /**
+     * Loop through the cells of the knownWorld.
+     * If the cell if covered, its not blocked and its not a mine then call the action class passing in its
+     * row and column.
+     */
     public void loop() {
-        System.out.println("LOOP CALLED");
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // if cell is covered check its adjacent neighbours.
                 if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
                     action(r, c);
                 }
-
-//                if (getGame().isGameWon(getUncovered().size(),getMarkedMines().size())) {
-//                    printFinal(1);
-//                }
+                // if the game is won, print final output.
+                if (getGame().isGameWon(getUncovered().size(),getMarkedMines().size(),2)) {
+                    printFinal(1);
+                }
             }
         }
+        printFinal(0); // print not terminated output if solution is not found.
     }
 
 
+    /**
+     * Used to uncover the cell located in the row and columns passed in using the AFN and AMN
+     * techniques.
+     * @param r the row passed in.
+     * @param c the column passed in.
+     */
     public void action(int r, int c) {
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
-        System.out.println("ACTION: r"+r+" c"+c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
             if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && neighbour.getValue() != 'b') {
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
-                    System.out.println("UNCOVER" +r +" "+ c);
                     uncover(r, c); // uncover cell.
                     printAgentKnownWorld(false);
-                    loop();
+                    loop(); // go find next cell.
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
                     markCell(r, c);
@@ -59,6 +68,13 @@ public class BeginnerAgent extends Agent {
         }
     }
 
+    //TODO: check comments again!! was not careful the first time writing them.
+    /**
+     * The AFN technique is used to determine if its safe to uncover the cell
+     * based on the neighbours of its neighbour passed in.
+     * @param cell the neighbouring cell being currently examined.
+     * @return true if all the mines were already found
+     */
     private boolean allFreeNeighbours(Cell cell) {
         System.out.println("NEIGHBOUR --- AFN:"+cell.getR()+" , "+cell.getC());
         int minesCount = 0;
@@ -74,12 +90,20 @@ public class BeginnerAgent extends Agent {
     }
 
 
+    /**
+     * The AMN technique is used to mark cells where we think there might
+     * be a mine.
+     * @param cell the neighbouring cell being currently examined.
+     * @return true if
+     */
     private boolean allMarkedNeighbours(Cell cell) {
         int minesCount = 0;
         int coveredCount = 0;
 
         ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.
 
+        // iterate through the neighbours of the passed in cell and count the
+        // number of covered cells and the ones containing mines.
         for (Cell neighbour : neighboursOfCell) {
             if (neighbour.getValue() == '*') {
                 minesCount++;
@@ -88,40 +112,11 @@ public class BeginnerAgent extends Agent {
             }
         }
 
-        int clue = Integer.parseInt(String.valueOf(cell.getValue()));
-//        System.out.println(cell.getR() + " ,, " + cell.getC() + "AMN" + coveredCount + " == " + cell.getValue() + " - " + minesCount);
+        int clue = Integer.parseInt(String.valueOf(cell.getValue())); // make the clue being an integer.
         return (coveredCount == clue - minesCount);
     }
 
 
-    public ArrayList<Cell> getAdjacentNeighbours(int r, int c) {
-        ArrayList<Cell> neighbours = new ArrayList<>();
 
-        addIfLegalNeighbours(neighbours, r - 1, c - 1); // Top Left
-        addIfLegalNeighbours(neighbours, r - 1, c); // Top Center
-        addIfLegalNeighbours(neighbours, r - 1, c + 1); // Top Right
-
-        addIfLegalNeighbours(neighbours, r, c - 1); // Left
-        addIfLegalNeighbours(neighbours, r, c + 1); // Right
-
-        addIfLegalNeighbours(neighbours, r + 1, c - 1); // Bottom Left
-        addIfLegalNeighbours(neighbours, r + 1, c); // Bottom
-        addIfLegalNeighbours(neighbours, r + 1, c + 1); // Bottom Right
-
-        return neighbours;
-    }
-
-    /**
-     * Discards any neighbours out of bounds.
-     *
-     * @param neighbours
-     * @return
-     */
-    public void addIfLegalNeighbours(ArrayList<Cell> neighbours, int r, int c) {
-
-        if (r >= 0 && r < getRowSize() && c >= 0 && c < getColumnSize()) {
-            neighbours.add(getKnownWorld()[r][c]);
-        }
-    }
 
 }

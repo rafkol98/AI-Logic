@@ -17,7 +17,7 @@ public class BasicAgent extends Agent{
                 if (getKnownWorld()[r][c].getValue() != 'b' && getKnownWorld()[r][c].getValue() == '?' && !containInList(r,c, getUncovered())) {
                     uncover(r, c);
 
-                    if (getGame().isGameWon(getUncovered().size(),0)) {
+                    if (getGame().isGameWon(getUncovered().size(),0,1)) {
                         printFinal(1);
                     } else {
                         printAgentKnownWorld(false);
@@ -27,6 +27,5 @@ public class BasicAgent extends Agent{
             }
         }
     }
-
 
 }

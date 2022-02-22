@@ -18,38 +18,6 @@ public abstract class Agent {
 
     private int rowSize, columnSize;
 
-    public Cell[][] getKnownWorld() {
-        return knownWorld;
-    }
-
-    public ArrayList<Cell> getUncovered() {
-        return uncovered;
-    }
-
-    public ArrayList<Cell> getMarkedMines() {
-        return markedMines;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public int getRowSize() {
-        return rowSize;
-    }
-
-    public int getColumnSize() {
-        return columnSize;
-    }
-
-    public ArrayList<Cell> getBlocked() {
-        return blocked;
-    }
-
-    public Cell getCentreCell() {
-        return centreCell;
-    }
-
     public Agent(char[][] board, int strategy, boolean verbose) {
         this.strategy = strategy;
         this.verbose = verbose;
@@ -58,6 +26,70 @@ public abstract class Agent {
         markedMines = new ArrayList<>();
         getKnowledgeBase();
         probe();
+    }
+
+    /**
+     * Get known world of the Agent.
+     * @return the known world in a 2D array.
+     */
+    public Cell[][] getKnownWorld() {
+        return knownWorld;
+    }
+
+    /**
+     * Get all the cells that were uncovered.
+     * @return the uncovered cells.
+     */
+    public ArrayList<Cell> getUncovered() {
+        return uncovered;
+    }
+
+    /**
+     * Get all the cells that were marked as mines.
+     * @return
+     */
+    public ArrayList<Cell> getMarkedMines() {
+        return markedMines;
+    }
+
+    /**
+     * Get the game.
+     * @return the game.
+     */
+    public Game getGame() {
+        return game;
+    }
+
+    /**
+     * Get the row size of the board.
+     * @return board's row size.
+     */
+    public int getRowSize() {
+        return rowSize;
+    }
+
+    /**
+     * Ge the column size of the board.
+     * @return board's column size.
+     */
+    public int getColumnSize() {
+        return columnSize;
+    }
+
+    /**
+     * Get all the cells that are blocked.
+     * @return blocked cells.
+     */
+    public ArrayList<Cell> getBlocked() {
+        return blocked;
+    }
+
+    /**
+     * Get the cell in the centre of the board.
+     * @return centre cell.
+     */
+    public Cell getCentreCell() {
+        return centreCell;
     }
 
     /**
@@ -83,32 +115,27 @@ public abstract class Agent {
      * Uncover the cell just probed.
      */
     public void uncover(int r, int c) {
-        // uncover only cells that are within the board's borders.
-        if (r >= 0 && r < rowSize && c >= 0 && c < columnSize) {
-            // Ask game about the value of the same coordinates but from real board.
-            Cell probedCell = game.getCell(r, c);
+        // Ask game about the value of the same coordinates but from real board.
+        Cell probedCell = game.getCell(r, c);
 
-//            System.out.println("mesa sto uncover " +r + " ,, "+c);
+        // if the probed cell is not a blocked cell and was not already probed, then proceed to uncover it to the agent.
+        if (!blocked.contains(probedCell) && !uncovered.contains(probedCell)) {
+            uncovered.add(probedCell); // add the cell to the probed list.
 
-            // if the probed cell is not a blocked cell and was not already probed, then proceed to uncover it to the agent.
-            if (!blocked.contains(probedCell) && !uncovered.contains(probedCell)) {
-                uncovered.add(probedCell); // add the cell to the probed list.
-
-//                System.out.println("mesa sto uncover " +r + " ,, "+c);
-                // if the probed cell is a mine, then the agent lost.
-                if (probedCell.isMine()) {
-                    knownWorld[probedCell.getR()][probedCell.getC()].setValue('-');
-                    printFinal(-1);
-                } else {
-                    // if the value of the probed cell is 0, then uncover adjacent cells.
-                    if (probedCell.getValue() == '0') {
-                        knownWorld[probedCell.getR()][probedCell.getC()].setValue(probedCell.getValue()); // uncover cell.
-                        uncoverAdjacentCells(r, c);  // Uncover adjacent cells.
-                    }
-                    // Uncover the value of the probed cell (agent knows the value).
-                    else {
-                        knownWorld[probedCell.getR()][probedCell.getC()].setValue(probedCell.getValue());
-                    }
+            // if the probed cell is a mine, then the agent lost.
+            //TODO: change this!!! has to ask the GAME CLASS if its a bomb!!
+            if (probedCell.isMine()) {
+                knownWorld[probedCell.getR()][probedCell.getC()].setValue('-');
+                printFinal(-1);
+            } else {
+                // if the value of the probed cell is 0, then uncover adjacent cells.
+                if (probedCell.getValue() == '0') {
+                    knownWorld[probedCell.getR()][probedCell.getC()].setValue(probedCell.getValue()); // uncover cell.
+                    uncoverAdjacentCells(r, c);  // Uncover adjacent cells.
+                }
+                // Uncover the value of the probed cell (agent knows the value).
+                else {
+                    knownWorld[probedCell.getR()][probedCell.getC()].setValue(probedCell.getValue());
                 }
             }
         }
@@ -118,41 +145,81 @@ public abstract class Agent {
      * If the cell contains a value 0 meaning that no adjacent cells contain mines,
      * all the non- blocked neighbouring cells will also be uncovered.
      *
-     * @param r
-     * @param c
+     * @param r the row of the cell.
+     * @param c the column of the cell.
      */
     public void uncoverAdjacentCells(int r, int c) {
-        uncover(r - 1, c - 1); // Top Left
-        uncover(r - 1, c); // Top Center
-        uncover(r - 1, c + 1); // Top Right
+        ArrayList<Cell> adjacentNeighbours = getAdjacentNeighbours(r, c);
 
-        uncover(r, c - 1); // Left
-        uncover(r, c + 1); // Right
-
-        uncover(r + 1, c - 1); // Bottom left
-        uncover(r + 1, c); // Bottom
-        uncover(r + 1, c + 1); // Bottom Right
+        for (Cell neighbour : adjacentNeighbours) {
+            uncover(neighbour.getR(), neighbour.getC());
+        }
     }
 
-    //TODO: flag cell when thinking mine is found.
+    /**
+     * Get all the adjacent neighbours of a cell and put them in
+     * an ArrayList. Only adds neighbours that are legal (within boundaries).
+     *
+     * @param r the row of the cell.
+     * @param c the column of the cell.
+     * @return the adjacent neighbours of a cell.
+     */
+    public ArrayList<Cell> getAdjacentNeighbours(int r, int c) {
+        ArrayList<Cell> neighbours = new ArrayList<>();
+
+        addIfLegalNeighbours(neighbours, r - 1, c - 1); // Top Left
+        addIfLegalNeighbours(neighbours, r - 1, c); // Top Center
+        addIfLegalNeighbours(neighbours, r - 1, c + 1); // Top Right
+
+        addIfLegalNeighbours(neighbours, r, c - 1); // Left
+        addIfLegalNeighbours(neighbours, r, c + 1); // Right
+
+        addIfLegalNeighbours(neighbours, r + 1, c - 1); // Bottom Left
+        addIfLegalNeighbours(neighbours, r + 1, c); // Bottom
+        addIfLegalNeighbours(neighbours, r + 1, c + 1); // Bottom Right
+
+        return neighbours;
+    }
+
+    /**
+     * Add to the neighbours list only if the neighbour is within boundaries.
+     *
+     * @param neighbours the neighbours arraylist
+     * @param r          the row of the cell.
+     * @param c          the column of the cell.
+     * @return the legal neighbours of a cell.
+     */
+    public void addIfLegalNeighbours(ArrayList<Cell> neighbours, int r, int c) {
+        if (r >= 0 && r < getRowSize() && c >= 0 && c < getColumnSize()) {
+            neighbours.add(getKnownWorld()[r][c]);
+        }
+    }
+
+    /**
+     * Mark a cell as a Mine. Set value of cell as '*' and add the cell to the
+     * marked mines ArrayList.
+     * @param r the row of the cell.
+     * @param c the column of the cell.
+     */
     public void markCell(int r, int c) {
-//        if (knownWorld[r][c].getValue() != 'b' && getUncovered().contains(knownWorld[r][c])) {
-            knownWorld[r][c].setValue('*');
-            markedMines.add(knownWorld[r][c]);
-//        }
+        knownWorld[r][c].setValue('*');
+        markedMines.add(knownWorld[r][c]);
     }
 
+    /**
+     * Initialise agent's world. Agent's world with the Game's map is different.
+     */
     public void initialiseAgentWorld() {
         // Start from top left.
         for (int r = 0; r < rowSize; r++) {
             for (int c = 0; c < columnSize; c++) {
                 // check if the current cell is known to be blocked.
-                if (containInList(r,c,blocked)) {
+                if (containInList(r, c, blocked)) {
                     // set the value of cell in r,c to b.
-                    knownWorld[r][c] = new Cell(r,c,'b');
+                    knownWorld[r][c] = new Cell(r, c, 'b');
                 } else {
                     // set the value of cell in r,c to ?.
-                    knownWorld[r][c] = new Cell(r,c,'?');
+                    knownWorld[r][c] = new Cell(r, c, '?');
                 }
             }
         }
@@ -160,6 +227,7 @@ public abstract class Agent {
 
     /**
      * Prints the agent's world.
+     *
      * @param finalOutput flag to determine if this method was celled for the final output.
      */
     public void printAgentKnownWorld(boolean finalOutput) {
@@ -194,8 +262,9 @@ public abstract class Agent {
      * Returns whether a cell is contained in a given list. Only the cell's row and columns
      * are required. This was created to avoid creating temporary cells repeatedly throughout
      * the code.
-     * @param r row of the cell.
-     * @param c column of the cell.
+     *
+     * @param r    row of the cell.
+     * @param c    column of the cell.
      * @param list the list to check.
      * @return
      */
@@ -205,7 +274,17 @@ public abstract class Agent {
     }
 
     /**
+     * Returns true if the cell is covered (not uncovered, not blocked, and not a marked mine).
+     * @param cell
+     * @return
+     */
+    public boolean isCellCovered(Cell cell) {
+        return !getUncovered().contains(cell) && !getBlocked().contains(cell) && !getMarkedMines().contains(cell);
+    }
+
+    /**
      * Used to print the final output.
+     *
      * @param status flag to determine whether the agent won, lost or terminated.
      */
     public void printFinal(int status) {
@@ -213,7 +292,7 @@ public abstract class Agent {
         printAgentKnownWorld(true);
         if (status == 1) {
             System.out.println("Result: Agent alive: all solved");
-        } else if (status == -1){
+        } else if (status == -1) {
             System.out.println("Result: Agent dead: found mine");
         } else if (status == 0) {
             System.out.println("Result: Agent not terminated");
@@ -221,6 +300,5 @@ public abstract class Agent {
 
         System.exit(0);
     }
-
 
 }
