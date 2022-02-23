@@ -1,7 +1,12 @@
 public class BasicAgent extends Agent{
 
-    public BasicAgent(char[][] board, int strategy, boolean verbose) {
-        super(board, strategy, verbose);
+    public BasicAgent(char[][] board, boolean verbose) {
+        super(board, verbose);
+    }
+
+    @Override
+    public void alternative() {
+
     }
 
     /**

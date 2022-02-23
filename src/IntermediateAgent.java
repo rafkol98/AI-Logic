@@ -1,82 +1,108 @@
-import org.logicng.formulas.FormulaFactory;
+
+//import org.logicng.formulas.FormulaFactory;
 
 import java.util.ArrayList;
 
-public class IntermediateAgent extends BasicAgent {
+public class IntermediateAgent extends BeginnerAgent {
 //    public class IntermediateAgent extends BeginnerAgent {
 
-    protected final FormulaFactory f = new FormulaFactory();
+//    private final FormulaFactory f = new FormulaFactory();
+    private final String AND = "&";
+    private final String OR = "|";
+    private final String NOT = "~";
 
-    public IntermediateAgent(char[][] board, int strategy, boolean verbose) {
-        super(board, strategy, verbose);
-        solve();
+
+    public IntermediateAgent(char[][] board, boolean verbose) {
+        super(board, verbose);
     }
 
-    public void solve() {
-        //WHILE LOOP
+    // If SPS fails, then use alternative approach, DNF.
+    @Override
+    public void alternative() {
+        super.alternative();
 
-        // Try solving with SPS
-
-        // if cannot make more inferences -> try with DNF.
-    }
-
-    public void dnf() {
         // Get cells that are already uncovered and have at least one covered neighbour.
         // They will be used to find their logical options and build our KB.
         ArrayList<Cell> cells = getSuitableCells();
 
+        String KBU = createKBU(cells); // create KBU.
 
+        System.out.println(KBU);
     }
 
 
-    public void createKBU(ArrayList<Cell> cells) {
-        ArrayList<String> logicOptions = new ArrayList<>();
+    public void prove(boolean isMine) {
 
-        for (Cell cell : cells) {
-            logicOptions.add(getLogicOptions(cell));
+    }
+
+    /**
+     * Create a Knowledge base of the unknowns (KBU).
+     * @param cells
+     * @return
+     */
+    public String createKBU(ArrayList<Cell> cells) {
+        String kbu = "";
+
+        // Add the logic options for each cell in the KBU.
+        for (int i = 0; i < cells.size(); i++) {
+            kbu += getLogicOptions(cells.get(i));
+
+            // Connect the logic options. If its the last element, then don't add an
+            // AND sign.
+            if (i != cells.size() - 1) {
+                kbu += " " + AND + " ";
+            }
         }
 
+        return kbu;
     }
 
-    //MAYBE ARRAYLIST OF ARRAYLISTS.
-
+    // TODO: improve comments.
     public String getLogicOptions(Cell cell) {
-        String logicOptions = "";
+        // Initialise logic connectors.
+        String logicOptions = "[";
+        String andInner = " " + AND + " ";
+        String connectOptions = " " + OR + " (";
 
-        ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(),cell.getC());
-        int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC());
+        ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
+        int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
         // Unmarked mines = clue - numberOfMarkedMines.
-        int remainingMines = cell.getValue() - numberOfMarkedMinesNeighbours;
+        int remainingMines = Integer.parseInt(String.valueOf(cell.getValue())) - numberOfMarkedMinesNeighbours;
 
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
 
         if (minesPosSets.size() > 0) {
             logicOptions += "(";
-            String andInner = " & ";
-            String connectOptions = " | (";
 
+            // iterate through the sets.
             for (int i = 0; i < minesPosSets.size(); i++) {
+                // Connect the different options with an OR.
                 if (i != 0) {
                     logicOptions += connectOptions;
                 }
+
+                // Iterate through the covered neighbours, to add inner elements.
                 for (int x = 0; x < coveredNeighbours.size(); x++) {
-                    Cell neighbour = coveredNeighbours.get(x);
+                    Cell neighbour = coveredNeighbours.get(x); // get neighbour.
+                    // Connect the different options with an AND.
                     if (x != 0) {
                         logicOptions += andInner;
                     }
+                    // Check the bigger set if it does not contain neighbour. If not then append the NOT symbol.
                     if (!minesPosSets.get(i).contains(neighbour)) {
-                        logicOptions += "~";
+                        logicOptions += NOT;
                     }
+                    // Add cell in the logic options string.
                     logicOptions += "M" + neighbour.getR() + neighbour.getC();
                 }
                 logicOptions += ")";
             }
         }
 
+        logicOptions += "]"; // add closing square brackets.
         return logicOptions;
     }
-
 
     public static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
         ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
@@ -89,12 +115,11 @@ public class IntermediateAgent extends BasicAgent {
     public static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
         ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
         if (coveredNeighbours.isEmpty()) {
-            System.out.println("mesa");
             sets.add(new ArrayList<Cell>());
             return sets;
         }
 
-        fillInnerSets(sets,coveredNeighbours);
+        fillInnerSets(sets, coveredNeighbours);
 
         return sets;
     }
@@ -109,17 +134,9 @@ public class IntermediateAgent extends BasicAgent {
             innerSet.add(top); // add the top.
             innerSet.addAll(set); // add all elements of the permutations.
 
-            sets.add(innerSet); // add
-            sets.add(set);
+            sets.add(innerSet); // add inner set in bigger set.
+            sets.add(set); // add set to sets.
         }
-    }
-
-    public void proveMine() {
-
-    }
-
-    public void proveNotMine() {
-
     }
 
     //TODO: think of better name.
@@ -132,7 +149,7 @@ public class IntermediateAgent extends BasicAgent {
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // check if the cell has at least one covered neighbour and is uncovered.
-                if(getOnlyCoveredNeighbours(r,c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
+                if (getOnlyCoveredNeighbours(r, c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
                     cells.add(getKnownWorld()[r][c]); // cell is suitable.
                 }
             }
@@ -141,12 +158,11 @@ public class IntermediateAgent extends BasicAgent {
         return cells;
     }
 
-
     //TODO: move them to AGENT class.
     public ArrayList<Cell> getOnlyCoveredNeighbours(int r, int c) {
         ArrayList<Cell> coveredNeighbours = new ArrayList<>();
 
-        ArrayList<Cell> neighbours = getAdjacentNeighbours(r,c);
+        ArrayList<Cell> neighbours = getAdjacentNeighbours(r, c);
         for (Cell neighbour : neighbours) {
             if (isCellCovered(neighbour)) {
                 coveredNeighbours.add(neighbour);
@@ -158,6 +174,7 @@ public class IntermediateAgent extends BasicAgent {
 
     /**
      * Get the number of mines that are marked in the neighbouring cells.
+     *
      * @param r
      * @param c
      * @return
@@ -165,7 +182,7 @@ public class IntermediateAgent extends BasicAgent {
     public int getNumberOfMinesMarkedNeighbours(int r, int c) {
         int minesMarked = 0;
 
-        ArrayList<Cell> neighbours = getAdjacentNeighbours(r,c);
+        ArrayList<Cell> neighbours = getAdjacentNeighbours(r, c);
         for (Cell neighbour : neighbours) {
             if (getKnownWorld()[neighbour.getC()][neighbour.getR()].getValue() == '*') {
                 minesMarked++;
@@ -174,8 +191,5 @@ public class IntermediateAgent extends BasicAgent {
 
         return minesMarked;
     }
-
-
-
 
 }

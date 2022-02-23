@@ -2,22 +2,23 @@ import java.util.ArrayList;
 
 public class BeginnerAgent extends Agent {
 
-    public BeginnerAgent(char[][] board, int strategy, boolean verbose) {
-        super(board, strategy, verbose);
+    public BeginnerAgent(char[][] board, boolean verbose) {
+        super(board, verbose);
     }
+
+    @Override
+    public void alternative() {}
+
 
     /**
      * Probe cells using the Single Point Strategy.
      */
     @Override
     public void probe() {
-        // Uncover safe cells (0,0) and centred cell.
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
-
         printAgentKnownWorld(false); // print the known world by the agent.
-
-        loop(); //
+        loop();
     }
 
     /**
@@ -34,11 +35,11 @@ public class BeginnerAgent extends Agent {
                 }
                 // if the game is won, print final output.
                 if (getGame().isGameWon(getUncovered().size(),getMarkedMines().size(),2)) {
-                    printFinal(1);
+                    solutionFound = true;
+                    printFinal(1); // prints final output and terminates the program.
                 }
             }
         }
-        printFinal(0); // print not terminated output if solution is not found.
     }
 
 
@@ -76,7 +77,6 @@ public class BeginnerAgent extends Agent {
      * @return true if all the mines were already found
      */
     private boolean allFreeNeighbours(Cell cell) {
-        System.out.println("NEIGHBOUR --- AFN:"+cell.getR()+" , "+cell.getC());
         int minesCount = 0;
 
         ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.

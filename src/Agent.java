@@ -6,7 +6,6 @@ public abstract class Agent {
 
     private Game game;
     private boolean verbose;
-    private int strategy;
 
     private Cell[][] knownWorld;
     private ArrayList<Cell> blocked; // the agent must know the blocked cells.
@@ -18,15 +17,30 @@ public abstract class Agent {
 
     private int rowSize, columnSize;
 
-    public Agent(char[][] board, int strategy, boolean verbose) {
-        this.strategy = strategy;
+    public boolean solutionFound = false;
+
+
+    public Agent(char[][] board, boolean verbose) {
         this.verbose = verbose;
         game = new Game(board);
         uncovered = new ArrayList<>();
         markedMines = new ArrayList<>();
         getKnowledgeBase();
-        probe();
+        solve();
     }
+
+    public void solve() {
+        probe(); // call abstract class.
+
+        alternative();
+
+        // if solution is not found, then print not terminated output.
+        if (!solutionFound) {
+            printFinal(0);
+        }
+    }
+
+    public abstract void alternative();
 
     /**
      * Get known world of the Agent.
@@ -42,6 +56,22 @@ public abstract class Agent {
      */
     public ArrayList<Cell> getUncovered() {
         return uncovered;
+    }
+
+    /**
+     * Get all the covered cells.
+     * @return
+     */
+    public ArrayList<Cell> getCovered() {
+        ArrayList<Cell> covered = new ArrayList<>();
+        for (int r = 0; r < getKnownWorld().length; r++) {
+            for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                if(!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
+                    covered.add(getKnownWorld()[r][c]);
+                }
+            }
+        }
+        return covered;
     }
 
     /**
