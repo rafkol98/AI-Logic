@@ -1,12 +1,16 @@
-
-//import org.logicng.formulas.FormulaFactory;
+import org.logicng.datastructures.Tristate;
+import org.logicng.formulas.Formula;
+import org.logicng.formulas.FormulaFactory;
+import org.logicng.io.parsers.ParserException;
+import org.logicng.io.parsers.PropositionalParser;
+import org.logicng.solvers.MiniSat;
+import org.logicng.solvers.SATSolver;
 
 import java.util.ArrayList;
 
 public class IntermediateAgent extends BeginnerAgent {
-//    public class IntermediateAgent extends BeginnerAgent {
 
-//    private final FormulaFactory f = new FormulaFactory();
+
     private final String AND = "&";
     private final String OR = "|";
     private final String NOT = "~";
@@ -14,6 +18,41 @@ public class IntermediateAgent extends BeginnerAgent {
 
     public IntermediateAgent(char[][] board, boolean verbose) {
         super(board, verbose);
+    }
+
+    public static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
+        ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
+
+        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
+
+        return possibleMinesSets;
+    }
+
+    public static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
+        ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
+        if (coveredNeighbours.isEmpty()) {
+            sets.add(new ArrayList<Cell>());
+            return sets;
+        }
+
+        fillInnerSets(sets, coveredNeighbours);
+
+        return sets;
+    }
+
+    public static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
+        Cell top = coveredNeighbours.get(0);
+        ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
+
+        for (ArrayList<Cell> set : permutations(remaining)) {
+            ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
+
+            innerSet.add(top); // add the top.
+            innerSet.addAll(set); // add all elements of the permutations.
+
+            sets.add(innerSet); // add inner set in bigger set.
+            sets.add(set); // add set to sets.
+        }
     }
 
     // If SPS fails, then use alternative approach, DNF.
@@ -25,18 +64,58 @@ public class IntermediateAgent extends BeginnerAgent {
         // They will be used to find their logical options and build our KB.
         ArrayList<Cell> cells = getSuitableCells();
 
-        String KBU = createKBU(cells); // create KBU.
+        String kbu = createKBU(cells); // create KBU.
 
-        System.out.println(KBU);
+        prove(kbu);
+
     }
 
+    public void prove(String kbu) {
 
-    public void prove(boolean isMine) {
+        ArrayList<Cell> covered = getCovered(); // get covered cells.
+
+        for (Cell cell : covered) {
+            String tempKBU = "";
+            FormulaFactory f = new FormulaFactory();
+            PropositionalParser p = new PropositionalParser(f);
+
+            System.out.println("MESA ");
+            String entailment = " " + AND + " M" + cell.getR() + cell.getC();
+            tempKBU = kbu + entailment;
+            System.out.println(tempKBU);
+            try {
+                Formula formula = p.parse(tempKBU);
+                SATSolver miniSat = MiniSat.miniSat(f);
+                miniSat.add(formula);
+
+                Tristate result = miniSat.sat();
+
+                System.out.println(result);
+
+                // if result equals TRUE, then mark as danger!
+                if (result.equals(Tristate.TRUE)) {
+                    markCell(cell.getR(), cell.getC()); // mark cell.
+                    printAgentKnownWorld(false);
+
+                }
+                // if result equals FALSE, then the cell is safe, uncover.
+                else if(result.equals(Tristate.FALSE)) {
+                    uncover(cell.getR(), cell.getC()); // uncover cell.
+                    printAgentKnownWorld(false);
+                }
+
+            } catch (ParserException e) {
+                System.out.println("There was a problem parsing the formula passed in");
+            }
+
+        }
+
 
     }
 
     /**
      * Create a Knowledge base of the unknowns (KBU).
+     *
      * @param cells
      * @return
      */
@@ -60,7 +139,7 @@ public class IntermediateAgent extends BeginnerAgent {
     // TODO: improve comments.
     public String getLogicOptions(Cell cell) {
         // Initialise logic connectors.
-        String logicOptions = "[";
+        String logicOptions = "(";
         String andInner = " " + AND + " ";
         String connectOptions = " " + OR + " (";
 
@@ -99,44 +178,8 @@ public class IntermediateAgent extends BeginnerAgent {
                 logicOptions += ")";
             }
         }
-
-        logicOptions += "]"; // add closing square brackets.
+        logicOptions += ")";
         return logicOptions;
-    }
-
-    public static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
-        ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
-
-        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
-
-        return possibleMinesSets;
-    }
-
-    public static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
-        ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
-        if (coveredNeighbours.isEmpty()) {
-            sets.add(new ArrayList<Cell>());
-            return sets;
-        }
-
-        fillInnerSets(sets, coveredNeighbours);
-
-        return sets;
-    }
-
-    public static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
-        Cell top = coveredNeighbours.get(0);
-        ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
-
-        for (ArrayList<Cell> set : permutations(remaining)) {
-            ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
-
-            innerSet.add(top); // add the top.
-            innerSet.addAll(set); // add all elements of the permutations.
-
-            sets.add(innerSet); // add inner set in bigger set.
-            sets.add(set); // add set to sets.
-        }
     }
 
     //TODO: think of better name.
