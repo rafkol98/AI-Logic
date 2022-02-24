@@ -4,6 +4,7 @@ public abstract class Agent {
 
     //TODO: FIX COMMENTS!
 
+    // Initialise variables.
     public boolean solutionFound = false;
     private Game game;
     private boolean verbose;
@@ -29,9 +30,10 @@ public abstract class Agent {
      * Solve the game.
      */
     public void solve() {
+
         probe(); // call abstract class.
 
-        alternative(); // if the game has not been solved based on the selected stratefy, call the alternative.
+//        alternative(); // if the game has not been solved based on the selected stratefy, call the alternative.
 
         // if solution is not found, then print not terminated output.
         if (!solutionFound) {

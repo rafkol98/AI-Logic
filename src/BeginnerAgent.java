@@ -6,6 +6,8 @@ public class BeginnerAgent extends Agent {
         super(board, verbose);
     }
 
+    boolean change = false;
+
     @Override
     public void alternative() {}
 
@@ -17,7 +19,7 @@ public class BeginnerAgent extends Agent {
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
         printAgentKnownWorld(false); // print the known world by the agent.
-        loop();
+        sps();
     }
 
     /**
@@ -25,12 +27,13 @@ public class BeginnerAgent extends Agent {
      * If the cell if covered, its not blocked and its not a mine then call the action class passing in its
      * row and column.
      */
-    public void loop() {
+    public void sps() {
+        System.out.println("called");
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
-
                 // if cell is covered check its adjacent neighbours.
                 if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
+                    System.out.println("examining "+ r+ " "+c);
                     action(r, c);
                 }
             }
@@ -48,16 +51,20 @@ public class BeginnerAgent extends Agent {
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
             if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && neighbour.getValue() != 'b') {
+                System.out.println(neighbour.getR() + " xx "+neighbour.getC());
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
+                    System.out.println("AFN");
                     uncover(r, c); // uncover cell.
                     worldChangedOuput();
-                    loop(); // go find next cell.
+                    change = true;
+//                    sps(); // go find next cell.
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
+                    System.out.println("AMN");
                     markCell(r, c);
                     worldChangedOuput();
-                    printAgentKnownWorld(false);
+                    change = true;
                     break;
                 }
             }
@@ -84,7 +91,6 @@ public class BeginnerAgent extends Agent {
         return (clue == minesCount);
     }
 
-
     /**
      * The AMN technique is used to mark cells where we think there might
      * be a mine.
@@ -110,9 +116,5 @@ public class BeginnerAgent extends Agent {
         int clue = Integer.parseInt(String.valueOf(cell.getValue())); // make the clue being an integer.
         return (coveredCount == clue - minesCount);
     }
-
-
-
-
 
 }
