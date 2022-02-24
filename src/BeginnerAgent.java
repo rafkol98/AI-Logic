@@ -9,7 +9,6 @@ public class BeginnerAgent extends Agent {
     @Override
     public void alternative() {}
 
-
     /**
      * Probe cells using the Single Point Strategy.
      */
@@ -29,19 +28,14 @@ public class BeginnerAgent extends Agent {
     public void loop() {
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
+
                 // if cell is covered check its adjacent neighbours.
                 if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
                     action(r, c);
                 }
-                // if the game is won, print final output.
-                if (getGame().isGameWon(getUncovered().size(),getMarkedMines().size(),2)) {
-                    solutionFound = true;
-                    printFinal(1); // prints final output and terminates the program.
-                }
             }
         }
     }
-
 
     /**
      * Used to uncover the cell located in the row and columns passed in using the AFN and AMN
@@ -57,11 +51,12 @@ public class BeginnerAgent extends Agent {
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
                     uncover(r, c); // uncover cell.
-                    printAgentKnownWorld(false);
+                    worldChangedOuput();
                     loop(); // go find next cell.
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
                     markCell(r, c);
+                    worldChangedOuput();
                     printAgentKnownWorld(false);
                     break;
                 }
@@ -115,6 +110,7 @@ public class BeginnerAgent extends Agent {
         int clue = Integer.parseInt(String.valueOf(cell.getValue())); // make the clue being an integer.
         return (coveredCount == clue - minesCount);
     }
+
 
 
 

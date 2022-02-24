@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class IntermediateAgent extends BeginnerAgent {
 
-
+    // Initialise logic variables.
     private final String AND = "&";
     private final String OR = "|";
     private final String NOT = "~";
@@ -20,114 +20,54 @@ public class IntermediateAgent extends BeginnerAgent {
         super(board, verbose);
     }
 
-    public static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
-        ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
-
-        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
-
-        return possibleMinesSets;
-    }
-
-    public static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
-        ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
-        if (coveredNeighbours.isEmpty()) {
-            sets.add(new ArrayList<Cell>());
-            return sets;
-        }
-
-        fillInnerSets(sets, coveredNeighbours);
-
-        return sets;
-    }
-
-    public static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
-        Cell top = coveredNeighbours.get(0);
-        ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
-
-        for (ArrayList<Cell> set : permutations(remaining)) {
-            ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
-
-            innerSet.add(top); // add the top.
-            innerSet.addAll(set); // add all elements of the permutations.
-
-            sets.add(innerSet); // add inner set in bigger set.
-            sets.add(set); // add set to sets.
-        }
-    }
-
-    // If SPS fails, then use alternative approach, DNF.
+    /**
+     *  This method is called when the SPS technique (implemented in the BeginnerAgent) can
+     *  make no other decuctions. It uses the DNF encoding technique.
+     */
     @Override
     public void alternative() {
         super.alternative();
 
-        // Get cells that are already uncovered and have at least one covered neighbour.
-        // They will be used to find their logical options and build our KB.
-        ArrayList<Cell> cells = getSuitableCells();
+        ArrayList<Cell> cells = getSuitableCells();  // Get suitable cells for further exploration.
 
         String kbu = createKBU(cells); // create KBU.
 
-        prove(kbu);
-
-    }
-
-    public void prove(String kbu) {
-
-        ArrayList<Cell> covered = getCovered(); // get covered cells.
-
-        for (Cell cell : covered) {
-            String tempKBU = "";
-            FormulaFactory f = new FormulaFactory();
-            PropositionalParser p = new PropositionalParser(f);
-
-            System.out.println("MESA ");
-            String entailment = " " + AND + " M" + cell.getR() + cell.getC();
-            tempKBU = kbu + entailment;
-            System.out.println(tempKBU);
-            try {
-                Formula formula = p.parse(tempKBU);
-                SATSolver miniSat = MiniSat.miniSat(f);
-                miniSat.add(formula);
-
-                Tristate result = miniSat.sat();
-
-                System.out.println(result);
-
-                // if result equals TRUE, then mark as danger!
-                if (result.equals(Tristate.TRUE)) {
-                    markCell(cell.getR(), cell.getC()); // mark cell.
-                    printAgentKnownWorld(false);
-
-                }
-                // if result equals FALSE, then the cell is safe, uncover.
-                else if(result.equals(Tristate.FALSE)) {
-                    uncover(cell.getR(), cell.getC()); // uncover cell.
-                    printAgentKnownWorld(false);
-                }
-
-            } catch (ParserException e) {
-                System.out.println("There was a problem parsing the formula passed in");
-            }
-
-        }
-
-
+        prove(kbu); // determine for each covered cell whether they contain a mine or not.
     }
 
     /**
-     * Create a Knowledge base of the unknowns (KBU).
-     *
-     * @param cells
-     * @return
+     * Get all the cells that are uncovered but have at least one neighbour that is covered.
+     * Those are the cells that we will be using inference to explore further.
      */
-    public String createKBU(ArrayList<Cell> cells) {
+    private ArrayList<Cell> getSuitableCells() {
+        ArrayList<Cell> cells = new ArrayList<>();
+        for (int r = 0; r < getKnownWorld().length; r++) {
+            for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                // check if the cell has at least one covered neighbour and is uncovered.
+                if (getOnlyCoveredNeighbours(r, c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
+                    cells.add(getKnownWorld()[r][c]); // cell is suitable.
+                }
+            }
+        }
+
+        return cells;
+    }
+
+    /**
+     * Create a Knowledge base of the unknowns (KBU) based on the suitable cells.
+     *
+     * @param cells the suitable cells for further exploration.
+     * @return the KBU as a string.
+     */
+    private String createKBU(ArrayList<Cell> cells) {
         String kbu = "";
 
         // Add the logic options for each cell in the KBU.
         for (int i = 0; i < cells.size(); i++) {
-            kbu += getLogicOptions(cells.get(i));
+            kbu += getLogicOptions(cells.get(i)); // add logic option in kbu for current cell.
 
-            // Connect the logic options. If its the last element, then don't add an
-            // AND sign.
+            // Connect the logic options.
+            // If its the last element, then don't add an AND sign.
             if (i != cells.size() - 1) {
                 kbu += " " + AND + " ";
             }
@@ -136,8 +76,43 @@ public class IntermediateAgent extends BeginnerAgent {
         return kbu;
     }
 
-    // TODO: improve comments.
-    public String getLogicOptions(Cell cell) {
+    /**
+     * Iterate through the covered cells and determine for each one
+     * whether they contain a mine or not.
+     *
+     * @param kbu the knowledge base of the unknowns.
+     */
+    private void prove(String kbu) {
+
+        ArrayList<Cell> covered = getCovered(); // get covered cells.
+
+        // iterate through the covered cells.
+        for (Cell cell : covered) {
+            String tempKBU = "";
+            FormulaFactory f = new FormulaFactory();
+            PropositionalParser p = new PropositionalParser(f);
+
+            String entailment = " " + AND + " M" + cell.getR() + cell.getC();
+            tempKBU = kbu + entailment;
+            try {
+                Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
+                SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
+                miniSat.add(formula); // add the formula to the miniSAT solver.
+                Tristate result = miniSat.sat(); // Get the entailement result.
+                uncoverOrMarkCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+            } catch (ParserException e) {
+                System.out.println("There was a problem parsing the formula passed in");
+            }
+        }
+    }
+
+    /**
+     * Get all the options available from a cell in a logic sentence.
+     *
+     * @param cell the cell to get the logic options of.
+     * @return the options of that cell in a logic sentence.
+     */
+    private String getLogicOptions(Cell cell) {
         // Initialise logic connectors.
         String logicOptions = "(";
         String andInner = " " + AND + " ";
@@ -182,57 +157,79 @@ public class IntermediateAgent extends BeginnerAgent {
         return logicOptions;
     }
 
-    //TODO: think of better name.
-
     /**
-     * Get all the cells that are uncovered but have at least one neighbour that is covered.
+     * Get all the possible sets that contain given mine count.
+     * @param coveredNeighbours the neighbours that are covered.
+     * @param minesCount the count of mines.
+     * @return an ArrayList containing an inner ArrayList with all the possible sets.
      */
-    private ArrayList<Cell> getSuitableCells() {
-        ArrayList<Cell> cells = new ArrayList<>();
-        for (int r = 0; r < getKnownWorld().length; r++) {
-            for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                // check if the cell has at least one covered neighbour and is uncovered.
-                if (getOnlyCoveredNeighbours(r, c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
-                    cells.add(getKnownWorld()[r][c]); // cell is suitable.
-                }
-            }
-        }
+    private static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
+        ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
 
-        return cells;
-    }
+        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
 
-    //TODO: move them to AGENT class.
-    public ArrayList<Cell> getOnlyCoveredNeighbours(int r, int c) {
-        ArrayList<Cell> coveredNeighbours = new ArrayList<>();
-
-        ArrayList<Cell> neighbours = getAdjacentNeighbours(r, c);
-        for (Cell neighbour : neighbours) {
-            if (isCellCovered(neighbour)) {
-                coveredNeighbours.add(neighbour);
-            }
-        }
-
-        return coveredNeighbours;
+        return possibleMinesSets;
     }
 
     /**
-     * Get the number of mines that are marked in the neighbouring cells.
-     *
-     * @param r
-     * @param c
-     * @return
+     * TODO: improve comments
+     * Get all the possible permutations for given covered neighbours.
+     * @param coveredNeighbours the covered neighbours given.
+     * @return all the possible permutations
      */
-    public int getNumberOfMinesMarkedNeighbours(int r, int c) {
-        int minesMarked = 0;
+    private static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
+        ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
 
-        ArrayList<Cell> neighbours = getAdjacentNeighbours(r, c);
-        for (Cell neighbour : neighbours) {
-            if (getKnownWorld()[neighbour.getC()][neighbour.getR()].getValue() == '*') {
-                minesMarked++;
-            }
+        // When empty, return sets.
+        if (coveredNeighbours.isEmpty()) {
+            sets.add(new ArrayList<Cell>());
+            return sets;
         }
 
-        return minesMarked;
+        fillInnerSets(sets, coveredNeighbours); // fill the inner sets
+
+        return sets;
+    }
+
+    /**
+     * TODO: improve comments
+     * Fill inner sets with the appropriate elements.
+     * @param sets the sets to be filled.
+     * @param coveredNeighbours the covered neighbours given.
+     */
+    private static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
+        Cell top = coveredNeighbours.get(0);
+        ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
+
+        // TODO: explain RECURSIVE CALL.
+        for (ArrayList<Cell> set : permutations(remaining)) {
+            ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
+
+            innerSet.add(top); // add the top.
+            innerSet.addAll(set); // add all elements of the permutations.
+
+            sets.add(innerSet); // add inner set in bigger set.
+            sets.add(set); // add set to sets.
+        }
+    }
+
+    /**
+     * TODO: improve comments
+     * Uncover or mark cells, depending on the result returned by LogicNG.
+     * @param result the result returned by LogicNG.
+     * @param cell the cell to be uncovered or maked.
+     */
+    private void uncoverOrMarkCell(Tristate result, Cell cell) {
+        // if result equals TRUE, then mark as danger!
+        if (result.equals(Tristate.TRUE)) {
+            markCell(cell.getR(), cell.getC()); // mark cell.
+            worldChangedOuput();
+        }
+        // if result equals FALSE, then the cell is safe, uncover.
+        else if(result.equals(Tristate.FALSE)) {
+            uncover(cell.getR(), cell.getC()); // uncover cell.
+            worldChangedOuput();
+        }
     }
 
 }
