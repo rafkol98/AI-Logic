@@ -31,7 +31,7 @@ public class IntermediateAgent extends BeginnerAgent {
         printAgentKnownWorld(false); // print the known world by the agent.
         while (!getCovered().isEmpty()) {
 
-                alternative();
+            alternative();
 //            }
 
         }
@@ -46,9 +46,12 @@ public class IntermediateAgent extends BeginnerAgent {
 
 //        System.out.println("called alt");
 
+        ArrayList<Cell> cells = getSuitableCells();
+        String kbu = createKBU(cells);  // create KBU.
 //        ArrayList<Cell> cells = getSuitableCells();  // Get suitable cells for further exploration.
+        proveMine(kbu);
+        prove(kbu); // determine for each covered cell whether they contain a mine or not.
 
-        prove(); // determine for each covered cell whether they contain a mine or not.
     }
 
     /**
@@ -81,7 +84,7 @@ public class IntermediateAgent extends BeginnerAgent {
         // Add the logic options for each cell in the KBU.
         for (int i = 0; i < cells.size(); i++) {
             String logicOptions =  getLogicOptions(cells.get(i));
-            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
+//            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
             kbu += logicOptions; // add logic option in kbu for current cell.
 
             // Connect the logic options.
@@ -99,15 +102,10 @@ public class IntermediateAgent extends BeginnerAgent {
      * whether they contain a mine or not.
      *
      */
-    private void prove() {
+    private void prove(String kbu) {
 
         ArrayList<Cell> covered = getCovered(); // get covered cells.
 
-        //TODO: maybe instead of first cell - get the cell the SPS technique tried to uncover.
-        ArrayList<Cell> cells = getSuitableCells();
-        String kbu = createKBU(cells);  // create KBU.
-//        Cell cell = covered.get(0);
-//        System.out.println(cell.getR() + " pp "+cell.getC());
         // iterate through the covered cells.
         for (Cell cell : covered) {
             String tempKBU = "";
@@ -115,7 +113,7 @@ public class IntermediateAgent extends BeginnerAgent {
             FormulaFactory f = new FormulaFactory();
             PropositionalParser p = new PropositionalParser(f);
 
-            String entailment = " " + AND + "M" + cell.getR() + cell.getC();
+            String entailment = " " + AND + " M" + cell.getR() + cell.getC();
 
             tempKBU = kbu + entailment;
             System.out.println("\n" + tempKBU);
@@ -124,8 +122,39 @@ public class IntermediateAgent extends BeginnerAgent {
                 SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
                 miniSat.add(formula); // add the formula to the miniSAT solver.
                 Tristate result = miniSat.sat(); // Get the entailement result.
+                System.out.println(result);
+                uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+            } catch (ParserException e) {
+                System.out.println(tempKBU);
+                e.getCause();
+                System.out.println(e.getMessage());
+                System.out.println("There was a problem parsing the formula passed in");
+            }
+        }
+    }
 
-                uncoverOrMarkCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+    private void proveMine(String kbu) {
+
+        ArrayList<Cell> covered = getCovered(); // get covered cells.
+
+        // iterate through the covered cells.
+        for (Cell cell : covered) {
+            String tempKBU = "";
+
+            FormulaFactory f = new FormulaFactory();
+            PropositionalParser p = new PropositionalParser(f);
+
+            String entailment = " " + AND + " " + NOT + "M" + cell.getR() + cell.getC();
+
+            tempKBU = kbu + entailment;
+            System.out.println("\n" + tempKBU);
+            try {
+                Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
+                SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
+                miniSat.add(formula); // add the formula to the miniSAT solver.
+                Tristate result = miniSat.sat(); // Get the entailement result.
+                System.out.println(result);
+                markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
             } catch (ParserException e) {
                 System.out.println(tempKBU);
                 e.getCause();
@@ -252,21 +281,30 @@ public class IntermediateAgent extends BeginnerAgent {
      * @param result the result returned by LogicNG.
      * @param cell the cell to be uncovered or maked.
      */
-    private void uncoverOrMarkCell(Tristate result, Cell cell) {
-        // if result equals TRUE, then mark as danger!
-        if (result.equals(Tristate.TRUE)) {
-            markCell(cell.getR(), cell.getC()); // mark cell.
-            worldChangedOuput();
-        }
+    private void uncoverCell(Tristate result, Cell cell) {
+//        // if result equals TRUE, then mark as danger!
+//        if (result.equals(Tristate.TRUE)) {
+//            markCell(cell.getR(), cell.getC()); // mark cell.
+//            worldChangedOuput();
+//        }
         // if result equals FALSE, then the cell is safe, uncover.
-        else if(result.equals(Tristate.FALSE)) {
+        if(result.equals(Tristate.FALSE)) {
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
         }
     }
 
-    private void proveEntailment() {
-
+    private void markCell(Tristate result, Cell cell) {
+//        // if result equals TRUE, then mark as danger!
+        if (result.equals(Tristate.FALSE)) {
+            markCell(cell.getR(), cell.getC()); // mark cell.
+            worldChangedOuput();
+        }
+//        // if result equals FALSE, then the cell is safe, uncover.
+//        if(result.equals(Tristate.FALSE)) {
+//            uncover(cell.getR(), cell.getC()); // uncover cell.
+//            worldChangedOuput();
+//        }
     }
 
 }
