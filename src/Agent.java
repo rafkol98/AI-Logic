@@ -22,7 +22,7 @@ public abstract class Agent {
         game = new Game(board);
         uncovered = new ArrayList<>();
         markedMines = new ArrayList<>();
-        getKnowledgeBase();
+        initialiseKnowledgeBase();
         solve();
     }
 
@@ -137,9 +137,9 @@ public abstract class Agent {
     }
 
     /**
-     * Get the knowledge base of the agent.
+     * Initialise the knowledge base of the agent.
      */
-    private void getKnowledgeBase() {
+    private void initialiseKnowledgeBase() {
         blocked = game.getBlockedCells();
         topLeft = game.getTopLeftCell();
         centreCell = game.getCentreOfBoardCell();

@@ -4,6 +4,10 @@ public class Game {
 
     private Cell[][] board;
 
+    /**
+     * Create a new Game instance.
+     * @param boardIn
+     */
     public Game(char[][] boardIn) {
         this.board = new Cell[boardIn.length][boardIn[0].length];
         createAllCellsInBoard(boardIn);
@@ -21,17 +25,28 @@ public class Game {
         }
     }
 
+    /**
+     * Get board's row size.
+     *
+     * @return the row size of the board.
+     */
     public int getBoardRowSize() {
         return board.length;
     }
 
+    /**
+     * Get board's column size.
+     *
+     * @return the column size of the board.
+     */
     public int getBoardColumnSize() {
         return board[0].length;
     }
 
     /**
      * Get the total number of mines.
-     * @return
+     *
+     * @return total number of mines.
      */
     public int getTotalNumberMines() {
         int totalNumberMines = 0;
@@ -50,7 +65,8 @@ public class Game {
 
     /**
      * Get the cells that are blocked.
-     * @return
+     *
+     * @return an ArrayList containing all the blocked cells.
      */
     public ArrayList<Cell> getBlockedCells() {
         ArrayList<Cell> blockedCells = new ArrayList<>();
@@ -68,21 +84,45 @@ public class Game {
         return blockedCells;
     }
 
-    // the agent can safely probe the cell in the centre of the board at the start of the game
+    /**
+     * Get the safe centre of the board cell.
+     *
+     * @return the cell located in the centre of the board.
+     */
     public Cell getCentreOfBoardCell() {
         int rowCenter = getBoardRowSize() / 2;
         int columnCenter = getBoardColumnSize() / 2;
         return board[rowCenter][columnCenter];
     }
 
+    /**
+     * Get the safe top left-cell (0,0).
+     *
+     * @return the top-left cell.
+     */
     public Cell getTopLeftCell() {
         return board[0][0];
     }
 
+    /**
+     * Get the Cell located in the passed in row and column.
+     *
+     * @param r row passed in.
+     * @param c column passed in.
+     * @return Cell located at the specified row and column coordinates.
+     */
     public Cell getCell(int r, int c) {
         return board[r][c];
     }
 
+    /**
+     * Method used to determine if the agent won the game.
+     *
+     * @param numberProbed the number of cells probed/uncovered.
+     * @param markedMines  the number of cells marked as mines.
+     * @param agentNo      the level of the agent (e.g. Basic, Beginner, Intermediate)
+     * @return true if the game is won, false otherwise.
+     */
     public boolean isGameWon(int numberProbed, int markedMines, int agentNo) {
         int numberBlocked = getBlockedCells().size();
         int numberCellsInBoard = getBoardRowSize() * getBoardColumnSize();

@@ -41,7 +41,7 @@ public class BeginnerAgent extends Agent {
     }
 
     /**
-     * Used to uncover the cell located in the row and columns passed in using the AFN and AMN
+     * Used to uncover or marka the cell located in the row and columns passed in using the AFN and AMN
      * techniques.
      * @param r the row passed in.
      * @param c the column passed in.
@@ -50,6 +50,7 @@ public class BeginnerAgent extends Agent {
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
+            //TODO: be consistent with getBlocked!!tc
             if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && neighbour.getValue() != 'b') {
                 System.out.println(neighbour.getR() + " xx "+neighbour.getC());
                 // if it is safe, then uncover cell.

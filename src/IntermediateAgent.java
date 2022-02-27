@@ -19,8 +19,6 @@ public class IntermediateAgent extends BeginnerAgent {
     //TODO: PROBLEM. NA DOKIMAZIS KATHE FORA ME TO sps JE META AN DEN GINETE, TOTE MONO NA PIENIS STO ALTERNATIVE.
 
 
-
-
     public IntermediateAgent(char[][] board, boolean verbose) {
         super(board, verbose);
 
@@ -28,18 +26,13 @@ public class IntermediateAgent extends BeginnerAgent {
 
     @Override
     public void probe() {
-//        super.probe();
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
         printAgentKnownWorld(false); // print the known world by the agent.
         while (!getCovered().isEmpty()) {
-            System.out.println("in the while loop");
-            change = false;
-            sps();
 
-            if (!change) {
                 alternative();
-            }
+//            }
 
         }
     }
@@ -51,7 +44,7 @@ public class IntermediateAgent extends BeginnerAgent {
     @Override
     public void alternative() {
 
-        System.out.println("called alt");
+//        System.out.println("called alt");
 
 //        ArrayList<Cell> cells = getSuitableCells();  // Get suitable cells for further exploration.
 
@@ -88,6 +81,7 @@ public class IntermediateAgent extends BeginnerAgent {
         // Add the logic options for each cell in the KBU.
         for (int i = 0; i < cells.size(); i++) {
             String logicOptions =  getLogicOptions(cells.get(i));
+            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
             kbu += logicOptions; // add logic option in kbu for current cell.
 
             // Connect the logic options.
@@ -109,6 +103,7 @@ public class IntermediateAgent extends BeginnerAgent {
 
         ArrayList<Cell> covered = getCovered(); // get covered cells.
 
+        //TODO: maybe instead of first cell - get the cell the SPS technique tried to uncover.
         ArrayList<Cell> cells = getSuitableCells();
         String kbu = createKBU(cells);  // create KBU.
 //        Cell cell = covered.get(0);
@@ -120,15 +115,16 @@ public class IntermediateAgent extends BeginnerAgent {
             FormulaFactory f = new FormulaFactory();
             PropositionalParser p = new PropositionalParser(f);
 
-            String entailment = " " + AND + " " + NOT +"M" + cell.getR() + cell.getC();
+            String entailment = " " + AND + "M" + cell.getR() + cell.getC();
+
             tempKBU = kbu + entailment;
-            System.out.println(tempKBU);
+            System.out.println("\n" + tempKBU);
             try {
                 Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
                 SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
                 miniSat.add(formula); // add the formula to the miniSAT solver.
                 Tristate result = miniSat.sat(); // Get the entailement result.
-                System.out.println(result);
+
                 uncoverOrMarkCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
             } catch (ParserException e) {
                 System.out.println(tempKBU);
@@ -258,15 +254,19 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     private void uncoverOrMarkCell(Tristate result, Cell cell) {
         // if result equals TRUE, then mark as danger!
-        if (result.equals(Tristate.FALSE)) {
+        if (result.equals(Tristate.TRUE)) {
             markCell(cell.getR(), cell.getC()); // mark cell.
             worldChangedOuput();
         }
         // if result equals FALSE, then the cell is safe, uncover.
-        else if(result.equals(Tristate.TRUE)) {
+        else if(result.equals(Tristate.FALSE)) {
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
         }
+    }
+
+    private void proveEntailment() {
+
     }
 
 }

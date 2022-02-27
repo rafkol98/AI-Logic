@@ -7,6 +7,14 @@ public class Cell {
     private char value;
     private boolean blocked, mine;
 
+    /**
+     * Create a new cell without value, passing in the row and columns. This is used for
+     * some checks to see if a cell is already contained in a list. This is done by creating a temporary
+     * empty cell to then use the equals method to check equality with an existing cell.
+     *
+     * @param r the x coordinate of the cell.
+     * @param c the y coordinate of the cell.
+     */
     public Cell(int r, int c) {
         this.r = r;
         this.c = c;
@@ -14,8 +22,9 @@ public class Cell {
 
     /**
      * Create a new cell on the board.
-     * @param r the x coordinate of the cell.
-     * @param c the y coordinate of the cell.
+     *
+     * @param r     the x coordinate of the cell.
+     * @param c     the y coordinate of the cell.
      * @param value the value of the cell.
      */
     public Cell(int r, int c, char value) {
@@ -25,6 +34,11 @@ public class Cell {
         setCellType(value); // det
     }
 
+    /**
+     * Set the type (mine, blocked, or normal) of the cell.
+     *
+     * @param value
+     */
     public void setCellType(char value) {
         switch (value) {
             case 'm':
@@ -44,6 +58,7 @@ public class Cell {
 
     /**
      * Get if the cell is blocked.
+     *
      * @return true if cell is blocked.
      */
     public boolean isBlocked() {
@@ -52,6 +67,7 @@ public class Cell {
 
     /**
      * Get if the cell contains a mine.
+     *
      * @return true if the cell contains a mine.
      */
     public boolean isMine() {
@@ -60,6 +76,7 @@ public class Cell {
 
     /**
      * Get x coordinate of the cell.
+     *
      * @return x coordinate.
      */
     public int getR() {
@@ -68,6 +85,7 @@ public class Cell {
 
     /**
      * Get y coordinate of the cell.
+     *
      * @return y coordinate.
      */
     public int getC() {
@@ -76,6 +94,7 @@ public class Cell {
 
     /**
      * Get the value of the cell.
+     *
      * @return cell's value.
      */
     public char getValue() {
