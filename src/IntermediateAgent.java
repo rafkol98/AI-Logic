@@ -15,6 +15,7 @@ public class IntermediateAgent extends BeginnerAgent {
     private final String OR = "|";
     private final String NOT = "~";
 
+    boolean logicInference = false;
 
     //TODO: PROBLEM. NA DOKIMAZIS KATHE FORA ME TO sps JE META AN DEN GINETE, TOTE MONO NA PIENIS STO ALTERNATIVE.
 
@@ -29,11 +30,22 @@ public class IntermediateAgent extends BeginnerAgent {
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
         printAgentKnownWorld(false); // print the known world by the agent.
+
         while (!getCovered().isEmpty()) {
+            change = false;
+            logicInference = false;
 
-            alternative();
-//            }
+            sps(); // call single-point-strategy.
 
+            // if sps did not make any changes (inferences) to the world, call the alternative - CNF technique.
+            if (!change) {
+                alternative();
+            }
+
+            // if both sps and CNF do not infer anything new, then break out of the system.
+            if(!change && !logicInference) {
+                break;
+            }
         }
     }
 
@@ -43,14 +55,11 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     @Override
     public void alternative() {
-
-//        System.out.println("called alt");
-
         ArrayList<Cell> cells = getSuitableCells();
         String kbu = createKBU(cells);  // create KBU.
-//        ArrayList<Cell> cells = getSuitableCells();  // Get suitable cells for further exploration.
-        proveMine(kbu);
-        prove(kbu); // determine for each covered cell whether they contain a mine or not.
+
+        proveMineOrFree(kbu, true);
+        proveMineOrFree(kbu, false); // determine for each covered cell whether they contain a mine or not.
 
     }
 
@@ -102,18 +111,22 @@ public class IntermediateAgent extends BeginnerAgent {
      * whether they contain a mine or not.
      *
      */
-    private void prove(String kbu) {
-
+    private void proveMineOrFree(String kbu, boolean proveMine) {
         ArrayList<Cell> covered = getCovered(); // get covered cells.
 
         // iterate through the covered cells.
         for (Cell cell : covered) {
+            String entailment;
             String tempKBU = "";
 
             FormulaFactory f = new FormulaFactory();
             PropositionalParser p = new PropositionalParser(f);
 
-            String entailment = " " + AND + " M" + cell.getR() + cell.getC();
+            if (proveMine) {
+                entailment = " " + AND + " " + NOT + "M" + cell.getR() + cell.getC();
+            } else {
+                entailment = " " + AND + " M" + cell.getR() + cell.getC();
+            }
 
             tempKBU = kbu + entailment;
             System.out.println("\n" + tempKBU);
@@ -122,8 +135,12 @@ public class IntermediateAgent extends BeginnerAgent {
                 SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
                 miniSat.add(formula); // add the formula to the miniSAT solver.
                 Tristate result = miniSat.sat(); // Get the entailement result.
-                System.out.println(result);
-                uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                if (proveMine) {
+                    markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                } else {
+                    uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                }
+
             } catch (ParserException e) {
                 System.out.println(tempKBU);
                 e.getCause();
@@ -133,36 +150,6 @@ public class IntermediateAgent extends BeginnerAgent {
         }
     }
 
-    private void proveMine(String kbu) {
-
-        ArrayList<Cell> covered = getCovered(); // get covered cells.
-
-        // iterate through the covered cells.
-        for (Cell cell : covered) {
-            String tempKBU = "";
-
-            FormulaFactory f = new FormulaFactory();
-            PropositionalParser p = new PropositionalParser(f);
-
-            String entailment = " " + AND + " " + NOT + "M" + cell.getR() + cell.getC();
-
-            tempKBU = kbu + entailment;
-            System.out.println("\n" + tempKBU);
-            try {
-                Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
-                SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
-                miniSat.add(formula); // add the formula to the miniSAT solver.
-                Tristate result = miniSat.sat(); // Get the entailement result.
-                System.out.println(result);
-                markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
-            } catch (ParserException e) {
-                System.out.println(tempKBU);
-                e.getCause();
-                System.out.println(e.getMessage());
-                System.out.println("There was a problem parsing the formula passed in");
-            }
-        }
-    }
 
     /**
      * Get all the options available from a cell in a logic sentence.
@@ -282,29 +269,22 @@ public class IntermediateAgent extends BeginnerAgent {
      * @param cell the cell to be uncovered or maked.
      */
     private void uncoverCell(Tristate result, Cell cell) {
-//        // if result equals TRUE, then mark as danger!
-//        if (result.equals(Tristate.TRUE)) {
-//            markCell(cell.getR(), cell.getC()); // mark cell.
-//            worldChangedOuput();
-//        }
+
         // if result equals FALSE, then the cell is safe, uncover.
         if(result.equals(Tristate.FALSE)) {
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
+            logicInference = true;
         }
     }
 
     private void markCell(Tristate result, Cell cell) {
-//        // if result equals TRUE, then mark as danger!
+//        // if result equals FALSE, then mark as danger!
         if (result.equals(Tristate.FALSE)) {
             markCell(cell.getR(), cell.getC()); // mark cell.
             worldChangedOuput();
+            logicInference = true;
         }
-//        // if result equals FALSE, then the cell is safe, uncover.
-//        if(result.equals(Tristate.FALSE)) {
-//            uncover(cell.getR(), cell.getC()); // uncover cell.
-//            worldChangedOuput();
-//        }
     }
 
 }
