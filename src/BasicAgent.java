@@ -5,7 +5,7 @@ public class BasicAgent extends Agent{
     }
 
     @Override
-    public void alternative() {
+    public void alternative(Cell cell) {
 
     }
 

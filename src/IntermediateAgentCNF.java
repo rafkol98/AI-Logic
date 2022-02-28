@@ -5,7 +5,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     }
 
     @Override
-    public void alternative() {
+    public void alternative(Cell cell) {
 
     }
 

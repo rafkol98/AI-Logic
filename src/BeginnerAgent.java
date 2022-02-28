@@ -9,7 +9,7 @@ public class BeginnerAgent extends Agent {
     boolean change = false;
 
     @Override
-    public void alternative() {}
+    public void alternative(Cell cell) {}
 
     /**
      * Probe cells using the Single Point Strategy.
@@ -19,7 +19,16 @@ public class BeginnerAgent extends Agent {
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
         printAgentKnownWorld(false); // print the known world by the agent.
-        sps();
+//        sps();
+        for (int r = 0; r < getKnownWorld().length; r++) {
+            for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                // if cell is covered check its adjacent neighbours.
+                if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
+                    System.out.println("examining "+ r+ " "+c);
+                    action(r, c);
+                }
+            }
+        }
     }
 
     /**

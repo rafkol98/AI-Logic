@@ -17,9 +17,6 @@ public class IntermediateAgent extends BeginnerAgent {
 
     boolean logicInference = false;
 
-    //TODO: PROBLEM. NA DOKIMAZIS KATHE FORA ME TO sps JE META AN DEN GINETE, TOTE MONO NA PIENIS STO ALTERNATIVE.
-
-
     public IntermediateAgent(char[][] board, boolean verbose) {
         super(board, verbose);
 
@@ -30,37 +27,64 @@ public class IntermediateAgent extends BeginnerAgent {
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
         printAgentKnownWorld(false); // print the known world by the agent.
+//
+//        while (!getCovered().isEmpty()) {
+//            change = false;
+//            logicInference = false;
+//
+//
+//            // if sps did not make any changes (inferences) to the world, call the alternative - CNF technique.
+//            if (!change) {
+//                alternative();
+//            }
+//
+//            // if both sps and CNF do not infer anything new, then break out of the system.
+//            if(!change && !logicInference) {
+//                break;
+//            }
+//        }
 
         while (!getCovered().isEmpty()) {
-            change = false;
-            logicInference = false;
+            for (int r = 0; r < getKnownWorld().length; r++) {
+                for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                    change = false;
+                    logicInference = false;
 
-            sps(); // call single-point-strategy.
+                    Cell cell = getKnownWorld()[r][c];
 
-            // if sps did not make any changes (inferences) to the world, call the alternative - CNF technique.
-            if (!change) {
-                alternative();
+                    if (!getUncovered().contains(cell) && !getBlocked().contains(cell) && !getMarkedMines().contains(cell)) {
+                        action(r, c);
+                    }
+
+                    if (!change) {
+                        alternative(cell);
+                    }
+                }
             }
 
-            // if both sps and CNF do not infer anything new, then break out of the system.
             if(!change && !logicInference) {
-                break;
+                printFinal(0);
             }
         }
     }
 
+    //TODO: might have to change getSUITABLE CLESS To return only relevant to r,c.
     /**
      *  This method is called when the sps technique (implemented in the BeginnerAgent) can
      *  make no other decuctions. It uses the DNF encoding technique.
      */
     @Override
-    public void alternative() {
+    public void alternative(Cell cell) {
         ArrayList<Cell> cells = getSuitableCells();
         String kbu = createKBU(cells);  // create KBU.
 
-        proveMineOrFree(kbu, true);
-        proveMineOrFree(kbu, false); // determine for each covered cell whether they contain a mine or not.
-
+        if(proveMineOrFree(cell, kbu, true)) {
+            System.out.println("Mine");
+        }
+        // determine for each covered cell whether they contain a mine or not.)
+        else if (proveMineOrFree(cell, kbu, false)) {
+            System.out.println("Free");
+        }
     }
 
     /**
@@ -111,17 +135,20 @@ public class IntermediateAgent extends BeginnerAgent {
      * whether they contain a mine or not.
      *
      */
-    private void proveMineOrFree(String kbu, boolean proveMine) {
-        ArrayList<Cell> covered = getCovered(); // get covered cells.
+    private boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
+//        Cell cell = getCovered().get(0); // get first covered cell.
 
-        // iterate through the covered cells.
-        for (Cell cell : covered) {
+        if (getCovered().contains(cell)) {
+
+            // iterate through the covered cells.
+//        for (Cell cell : covered) {
             String entailment;
             String tempKBU = "";
 
             FormulaFactory f = new FormulaFactory();
             PropositionalParser p = new PropositionalParser(f);
 
+            // if the proveMine flag is true, then we want to entail whether the cell is a mine.
             if (proveMine) {
                 entailment = " " + AND + " " + NOT + "M" + cell.getR() + cell.getC();
             } else {
@@ -130,15 +157,16 @@ public class IntermediateAgent extends BeginnerAgent {
 
             tempKBU = kbu + entailment;
             System.out.println("\n" + tempKBU);
+
             try {
                 Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
                 SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
                 miniSat.add(formula); // add the formula to the miniSAT solver.
                 Tristate result = miniSat.sat(); // Get the entailement result.
                 if (proveMine) {
-                    markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                    return markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
                 } else {
-                    uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                    return uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
                 }
 
             } catch (ParserException e) {
@@ -147,7 +175,9 @@ public class IntermediateAgent extends BeginnerAgent {
                 System.out.println(e.getMessage());
                 System.out.println("There was a problem parsing the formula passed in");
             }
+//        }
         }
+        return false;
     }
 
 
@@ -268,23 +298,27 @@ public class IntermediateAgent extends BeginnerAgent {
      * @param result the result returned by LogicNG.
      * @param cell the cell to be uncovered or maked.
      */
-    private void uncoverCell(Tristate result, Cell cell) {
+    private boolean uncoverCell(Tristate result, Cell cell) {
 
         // if result equals FALSE, then the cell is safe, uncover.
         if(result.equals(Tristate.FALSE)) {
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
             logicInference = true;
+            return true;
         }
+        return false;
     }
 
-    private void markCell(Tristate result, Cell cell) {
+    private boolean markCell(Tristate result, Cell cell) {
 //        // if result equals FALSE, then mark as danger!
         if (result.equals(Tristate.FALSE)) {
             markCell(cell.getR(), cell.getC()); // mark cell.
             worldChangedOuput();
             logicInference = true;
+            return true;
         }
+        return false;
     }
 
 }

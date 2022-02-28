@@ -45,7 +45,7 @@ public abstract class Agent {
      * Try to solve the game using an alternative approach.
      * This alternative approach is different for each level of agent.
      */
-    public abstract void alternative();
+    public abstract void alternative(Cell cell);
 
     /**
      * Get known world of the Agent.
