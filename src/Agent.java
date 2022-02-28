@@ -271,7 +271,7 @@ public abstract class Agent {
 
         ArrayList<Cell> neighbours = getAdjacentNeighbours(r, c);
         for (Cell neighbour : neighbours) {
-            if (getKnownWorld()[neighbour.getC()][neighbour.getR()].getValue() == '*') {
+            if (getKnownWorld()[neighbour.getR()][neighbour.getC()].getValue() == '*') {
                 minesMarked++;
             }
         }

@@ -22,27 +22,72 @@ public class IntermediateAgent extends BeginnerAgent {
 
     }
 
+    /**
+     * Get all the possible sets that contain given mine count.
+     *
+     * @param coveredNeighbours the neighbours that are covered.
+     * @param minesCount        the count of mines.
+     * @return an ArrayList containing an inner ArrayList with all the possible sets.
+     */
+    private static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
+        ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
+
+        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
+
+        return possibleMinesSets;
+    }
+
+    //TODO: might have to change getSUITABLE CLESS To return only relevant to r,c.
+
+    /**
+     * TODO: improve comments
+     * Get all the possible permutations for given covered neighbours.
+     *
+     * @param coveredNeighbours the covered neighbours given.
+     * @return all the possible permutations
+     */
+    private static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
+        ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
+
+        // When empty, return sets.
+        if (coveredNeighbours.isEmpty()) {
+            sets.add(new ArrayList<Cell>());
+            return sets;
+        }
+
+        fillInnerSets(sets, coveredNeighbours); // fill the inner sets
+
+        return sets;
+    }
+
+    /**
+     * TODO: improve comments
+     * Fill inner sets with the appropriate elements.
+     *
+     * @param sets              the sets to be filled.
+     * @param coveredNeighbours the covered neighbours given.
+     */
+    private static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
+        Cell top = coveredNeighbours.get(0);
+        ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
+
+        // TODO: explain RECURSIVE CALL.
+        for (ArrayList<Cell> set : permutations(remaining)) {
+            ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
+
+            innerSet.add(top); // add the top.
+            innerSet.addAll(set); // add all elements of the permutations.
+
+            sets.add(innerSet); // add inner set in bigger set.
+            sets.add(set); // add set to sets.
+        }
+    }
+
     @Override
     public void probe() {
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
         printAgentKnownWorld(false); // print the known world by the agent.
-//
-//        while (!getCovered().isEmpty()) {
-//            change = false;
-//            logicInference = false;
-//
-//
-//            // if sps did not make any changes (inferences) to the world, call the alternative - CNF technique.
-//            if (!change) {
-//                alternative();
-//            }
-//
-//            // if both sps and CNF do not infer anything new, then break out of the system.
-//            if(!change && !logicInference) {
-//                break;
-//            }
-//        }
 
         while (!getCovered().isEmpty()) {
             for (int r = 0; r < getKnownWorld().length; r++) {
@@ -56,29 +101,28 @@ public class IntermediateAgent extends BeginnerAgent {
                         action(r, c);
                     }
 
-                    if (!change) {
+                    if (!change && getCovered().contains(cell)) {
                         alternative(cell);
                     }
                 }
             }
 
-            if(!change && !logicInference) {
+            if (!change && !logicInference) {
                 printFinal(0);
             }
         }
     }
 
-    //TODO: might have to change getSUITABLE CLESS To return only relevant to r,c.
     /**
-     *  This method is called when the sps technique (implemented in the BeginnerAgent) can
-     *  make no other decuctions. It uses the DNF encoding technique.
+     * This method is called when the sps technique (implemented in the BeginnerAgent) can
+     * make no other decuctions. It uses the DNF encoding technique.
      */
     @Override
     public void alternative(Cell cell) {
         ArrayList<Cell> cells = getSuitableCells();
         String kbu = createKBU(cells);  // create KBU.
 
-        if(proveMineOrFree(cell, kbu, true)) {
+        if (proveMineOrFree(cell, kbu, true)) {
             System.out.println("Mine");
         }
         // determine for each covered cell whether they contain a mine or not.)
@@ -97,6 +141,7 @@ public class IntermediateAgent extends BeginnerAgent {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // check if the cell has at least one covered neighbour and is uncovered.
                 if (getOnlyCoveredNeighbours(r, c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
+                    System.out.println("UNCOVERED: " + r + " , "+ c );
                     cells.add(getKnownWorld()[r][c]); // cell is suitable.
                 }
             }
@@ -116,7 +161,9 @@ public class IntermediateAgent extends BeginnerAgent {
 
         // Add the logic options for each cell in the KBU.
         for (int i = 0; i < cells.size(); i++) {
-            String logicOptions =  getLogicOptions(cells.get(i));
+            System.out.println("INSIDE CREATE KBU: "+ cells.get(i).getR() + " , "+ cells.get(i).getC());
+            String logicOptions = getLogicOptions(cells.get(i));
+            System.out.println(logicOptions);
 //            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
             kbu += logicOptions; // add logic option in kbu for current cell.
 
@@ -133,15 +180,10 @@ public class IntermediateAgent extends BeginnerAgent {
     /**
      * Iterate through the covered cells and determine for each one
      * whether they contain a mine or not.
-     *
      */
     private boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
-//        Cell cell = getCovered().get(0); // get first covered cell.
+//        if (getCovered().contains(cell)) {
 
-        if (getCovered().contains(cell)) {
-
-            // iterate through the covered cells.
-//        for (Cell cell : covered) {
             String entailment;
             String tempKBU = "";
 
@@ -176,10 +218,8 @@ public class IntermediateAgent extends BeginnerAgent {
                 System.out.println("There was a problem parsing the formula passed in");
             }
 //        }
-        }
         return false;
     }
-
 
     /**
      * Get all the options available from a cell in a logic sentence.
@@ -193,9 +233,12 @@ public class IntermediateAgent extends BeginnerAgent {
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
+        System.out.println("numberof marked mines neighbours" +numberOfMarkedMinesNeighbours);
+
         // Unmarked mines = clue - numberOfMarkedMines.
         int remainingMines = Integer.parseInt(String.valueOf(cell.getValue())) - numberOfMarkedMinesNeighbours;
 
+        System.out.println("remaining mines" +remainingMines);
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
 
         if (minesPosSets.size() > 0) {
@@ -237,71 +280,16 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
-     * Get all the possible sets that contain given mine count.
-     * @param coveredNeighbours the neighbours that are covered.
-     * @param minesCount the count of mines.
-     * @return an ArrayList containing an inner ArrayList with all the possible sets.
-     */
-    private static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
-        ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
-
-        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
-
-        return possibleMinesSets;
-    }
-
-    /**
-     * TODO: improve comments
-     * Get all the possible permutations for given covered neighbours.
-     * @param coveredNeighbours the covered neighbours given.
-     * @return all the possible permutations
-     */
-    private static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
-        ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
-
-        // When empty, return sets.
-        if (coveredNeighbours.isEmpty()) {
-            sets.add(new ArrayList<Cell>());
-            return sets;
-        }
-
-        fillInnerSets(sets, coveredNeighbours); // fill the inner sets
-
-        return sets;
-    }
-
-    /**
-     * TODO: improve comments
-     * Fill inner sets with the appropriate elements.
-     * @param sets the sets to be filled.
-     * @param coveredNeighbours the covered neighbours given.
-     */
-    private static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
-        Cell top = coveredNeighbours.get(0);
-        ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
-
-        // TODO: explain RECURSIVE CALL.
-        for (ArrayList<Cell> set : permutations(remaining)) {
-            ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
-
-            innerSet.add(top); // add the top.
-            innerSet.addAll(set); // add all elements of the permutations.
-
-            sets.add(innerSet); // add inner set in bigger set.
-            sets.add(set); // add set to sets.
-        }
-    }
-
-    /**
      * TODO: improve comments
      * Uncover or mark cells, depending on the result returned by LogicNG.
+     *
      * @param result the result returned by LogicNG.
-     * @param cell the cell to be uncovered or maked.
+     * @param cell   the cell to be uncovered or maked.
      */
     private boolean uncoverCell(Tristate result, Cell cell) {
 
         // if result equals FALSE, then the cell is safe, uncover.
-        if(result.equals(Tristate.FALSE)) {
+        if (result.equals(Tristate.FALSE)) {
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
             logicInference = true;
