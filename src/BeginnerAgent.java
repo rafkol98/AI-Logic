@@ -23,27 +23,8 @@ public class BeginnerAgent extends Agent {
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // if cell is covered check its adjacent neighbours.
-                if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
-                    System.out.println("examining "+ r+ " "+c);
-                    action(r, c);
-                }
-            }
-        }
-    }
-
-    /**
-     * Loop through the cells of the knownWorld.
-     * If the cell if covered, its not blocked and its not a mine then call the action class passing in its
-     * row and column.
-     */
-    public void sps() {
-        System.out.println("called");
-        for (int r = 0; r < getKnownWorld().length; r++) {
-            for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                // if cell is covered check its adjacent neighbours.
-                if (!getUncovered().contains(getKnownWorld()[r][c]) && !getBlocked().contains(getKnownWorld()[r][c]) && !getMarkedMines().contains(getKnownWorld()[r][c])) {
-                    System.out.println("examining "+ r+ " "+c);
-                    action(r, c);
+                if (getCovered().contains(getKnownWorld()[r][c])) {
+                    sps(r, c);
                 }
             }
         }
@@ -55,7 +36,7 @@ public class BeginnerAgent extends Agent {
      * @param r the row passed in.
      * @param c the column passed in.
      */
-    public void action(int r, int c) {
+    public void sps(int r, int c) {
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.

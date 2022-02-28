@@ -22,6 +22,124 @@ public class IntermediateAgent extends BeginnerAgent {
 
     }
 
+    @Override
+    public void probe() {
+        uncover(0, 0);
+        uncover(getCentreCell().getR(), getCentreCell().getC());
+        printAgentKnownWorld(false); // print the known world by the agent.
+
+        // While there are cells that are covered, continue to look for inferences.
+        while (!getCovered().isEmpty()) {
+            for (int r = 0; r < getKnownWorld().length; r++) {
+                for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                    change = false;
+                    logicInference = false;
+
+                    Cell cell = getKnownWorld()[r][c];
+                    // if
+                    if (getCovered().contains(cell)) {
+                        sps(r, c);
+                    }
+
+                    if (!change && getCovered().contains(cell)) {
+                        alternative(cell);
+                    }
+                }
+            }
+
+            if (!change && !logicInference) {
+                printFinal(0);
+            }
+        }
+    }
+
+    /**
+     * This method is called when the sps technique (implemented in the BeginnerAgent) can
+     * make no other decuctions. It uses the DNF encoding technique.
+     */
+    @Override
+    public void alternative(Cell cell) {
+        ArrayList<Cell> cells = getSuitableCells();
+        String kbu = createKBU(cells);  // create KBU.
+
+        if (proveMineOrFree(cell, kbu, true)) {
+            System.out.println("Mine");
+        }
+        // determine for each covered cell whether they contain a mine or not.)
+        else if (proveMineOrFree(cell, kbu, false)) {
+            System.out.println("Free");
+        }
+    }
+
+    /**
+     * Create a Knowledge base of the unknowns (KBU) based on the suitable cells.
+     *
+     * @param cells the suitable cells for further exploration.
+     * @return the KBU as a string.
+     */
+    private String createKBU(ArrayList<Cell> cells) {
+        String kbu = "";
+
+        // Add the logic options for each cell in the KBU.
+        for (int i = 0; i < cells.size(); i++) {
+            System.out.println("INSIDE CREATE KBU: "+ cells.get(i).getR() + " , "+ cells.get(i).getC());
+            String logicOptions = getLogicOptions(cells.get(i));
+            System.out.println(logicOptions);
+//            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
+            kbu += logicOptions; // add logic option in kbu for current cell.
+
+            // Connect the logic options.
+            // If its the last element, then don't add an AND sign.
+            if (i != cells.size() - 1 && logicOptions.length() >= 1) {
+                kbu += " " + AND + " ";
+            }
+        }
+
+        return kbu;
+    }
+
+    /**
+     * Iterate through the covered cells and determine for each one
+     * whether they contain a mine or not.
+     */
+    private boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
+        String entailment;
+        String tempKBU = "";
+
+        FormulaFactory f = new FormulaFactory();
+        PropositionalParser p = new PropositionalParser(f);
+
+        // if the proveMine flag is true, then we want to entail whether the cell is a mine.
+        if (proveMine) {
+            entailment = " " + AND + " " + NOT + "M" + cell.getR() + cell.getC();
+        } else {
+            entailment = " " + AND + " M" + cell.getR() + cell.getC();
+        }
+
+        tempKBU = kbu + entailment;
+        System.out.println("\n" + tempKBU);
+
+        try {
+            Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
+            SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
+            miniSat.add(formula); // add the formula to the miniSAT solver.
+            Tristate result = miniSat.sat(); // Get the entailement result.
+            if (proveMine) {
+                return markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+            } else {
+                return uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+            }
+
+        } catch (ParserException e) {
+            System.out.println(tempKBU);
+            e.getCause();
+            System.out.println(e.getMessage());
+            System.out.println("There was a problem parsing the formula passed in");
+        }
+
+        return false;
+    }
+
     /**
      * Get all the possible sets that contain given mine count.
      *
@@ -36,8 +154,6 @@ public class IntermediateAgent extends BeginnerAgent {
 
         return possibleMinesSets;
     }
-
-    //TODO: might have to change getSUITABLE CLESS To return only relevant to r,c.
 
     /**
      * TODO: improve comments
@@ -83,53 +199,7 @@ public class IntermediateAgent extends BeginnerAgent {
         }
     }
 
-    @Override
-    public void probe() {
-        uncover(0, 0);
-        uncover(getCentreCell().getR(), getCentreCell().getC());
-        printAgentKnownWorld(false); // print the known world by the agent.
 
-        while (!getCovered().isEmpty()) {
-            for (int r = 0; r < getKnownWorld().length; r++) {
-                for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                    change = false;
-                    logicInference = false;
-
-                    Cell cell = getKnownWorld()[r][c];
-
-                    if (!getUncovered().contains(cell) && !getBlocked().contains(cell) && !getMarkedMines().contains(cell)) {
-                        action(r, c);
-                    }
-
-                    if (!change && getCovered().contains(cell)) {
-                        alternative(cell);
-                    }
-                }
-            }
-
-            if (!change && !logicInference) {
-                printFinal(0);
-            }
-        }
-    }
-
-    /**
-     * This method is called when the sps technique (implemented in the BeginnerAgent) can
-     * make no other decuctions. It uses the DNF encoding technique.
-     */
-    @Override
-    public void alternative(Cell cell) {
-        ArrayList<Cell> cells = getSuitableCells();
-        String kbu = createKBU(cells);  // create KBU.
-
-        if (proveMineOrFree(cell, kbu, true)) {
-            System.out.println("Mine");
-        }
-        // determine for each covered cell whether they contain a mine or not.)
-        else if (proveMineOrFree(cell, kbu, false)) {
-            System.out.println("Free");
-        }
-    }
 
     /**
      * Get all the cells that are uncovered but have at least one neighbour that is covered.
@@ -150,76 +220,7 @@ public class IntermediateAgent extends BeginnerAgent {
         return cells;
     }
 
-    /**
-     * Create a Knowledge base of the unknowns (KBU) based on the suitable cells.
-     *
-     * @param cells the suitable cells for further exploration.
-     * @return the KBU as a string.
-     */
-    private String createKBU(ArrayList<Cell> cells) {
-        String kbu = "";
 
-        // Add the logic options for each cell in the KBU.
-        for (int i = 0; i < cells.size(); i++) {
-            System.out.println("INSIDE CREATE KBU: "+ cells.get(i).getR() + " , "+ cells.get(i).getC());
-            String logicOptions = getLogicOptions(cells.get(i));
-            System.out.println(logicOptions);
-//            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
-            kbu += logicOptions; // add logic option in kbu for current cell.
-
-            // Connect the logic options.
-            // If its the last element, then don't add an AND sign.
-            if (i != cells.size() - 1 && logicOptions.length() >= 1) {
-                kbu += " " + AND + " ";
-            }
-        }
-
-        return kbu;
-    }
-
-    /**
-     * Iterate through the covered cells and determine for each one
-     * whether they contain a mine or not.
-     */
-    private boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
-//        if (getCovered().contains(cell)) {
-
-            String entailment;
-            String tempKBU = "";
-
-            FormulaFactory f = new FormulaFactory();
-            PropositionalParser p = new PropositionalParser(f);
-
-            // if the proveMine flag is true, then we want to entail whether the cell is a mine.
-            if (proveMine) {
-                entailment = " " + AND + " " + NOT + "M" + cell.getR() + cell.getC();
-            } else {
-                entailment = " " + AND + " M" + cell.getR() + cell.getC();
-            }
-
-            tempKBU = kbu + entailment;
-            System.out.println("\n" + tempKBU);
-
-            try {
-                Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
-                SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
-                miniSat.add(formula); // add the formula to the miniSAT solver.
-                Tristate result = miniSat.sat(); // Get the entailement result.
-                if (proveMine) {
-                    return markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
-                } else {
-                    return uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
-                }
-
-            } catch (ParserException e) {
-                System.out.println(tempKBU);
-                e.getCause();
-                System.out.println(e.getMessage());
-                System.out.println("There was a problem parsing the formula passed in");
-            }
-//        }
-        return false;
-    }
 
     /**
      * Get all the options available from a cell in a logic sentence.
@@ -248,6 +249,7 @@ public class IntermediateAgent extends BeginnerAgent {
             String connectOptions = " " + OR + " (";
 
             System.out.println(minesPosSets.size());
+
             logicOptions += "(";
 
             // iterate through the sets.
@@ -299,7 +301,7 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     private boolean markCell(Tristate result, Cell cell) {
-//        // if result equals FALSE, then mark as danger!
+        // if result equals FALSE, then mark as danger!
         if (result.equals(Tristate.FALSE)) {
             markCell(cell.getR(), cell.getC()); // mark cell.
             worldChangedOuput();

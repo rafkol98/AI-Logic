@@ -33,8 +33,6 @@ public abstract class Agent {
 
         probe(); // call abstract class.
 
-//        alternative(); // if the game has not been solved based on the selected stratefy, call the alternative.
-
         // if solution is not found, then print not terminated output.
         if (!solutionFound) {
             printFinal(0);
