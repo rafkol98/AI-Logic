@@ -6,7 +6,8 @@ public class BeginnerAgent extends Agent {
         super(board, verbose);
     }
 
-    boolean change = false;
+//    boolean change = false;
+
 
     @Override
     public void alternative(Cell cell) {}
@@ -45,17 +46,16 @@ public class BeginnerAgent extends Agent {
                 System.out.println(neighbour.getR() + " xx "+neighbour.getC());
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
-                    System.out.println("AFN");
+                    System.out.println("AFN "+r+" , "+c);
                     uncover(r, c); // uncover cell.
                     worldChangedOuput();
-                    change = true;
-//                    sps(); // go find next cell.
+//                    change = true;
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
                     System.out.println("AMN");
                     markCell(r, c);
                     worldChangedOuput();
-                    change = true;
+//                    change = true;
                     break;
                 }
             }

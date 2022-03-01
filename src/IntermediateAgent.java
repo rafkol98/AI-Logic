@@ -1,3 +1,4 @@
+import jdk.swing.interop.SwingInterOpUtils;
 import org.logicng.datastructures.Tristate;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -19,8 +20,8 @@ public class IntermediateAgent extends BeginnerAgent {
 
     public IntermediateAgent(char[][] board, boolean verbose) {
         super(board, verbose);
-
     }
+
 
     @Override
     public void probe() {
@@ -32,22 +33,27 @@ public class IntermediateAgent extends BeginnerAgent {
         while (!getCovered().isEmpty()) {
             for (int r = 0; r < getKnownWorld().length; r++) {
                 for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                    change = false;
-                    logicInference = false;
-
+//                    change = false;
+//                    logicInference = false;
+                    System.out.println(r + " ,,, "+c);
                     Cell cell = getKnownWorld()[r][c];
                     // if
                     if (getCovered().contains(cell)) {
                         sps(r, c);
                     }
 
-                    if (!change && getCovered().contains(cell)) {
+                    if (getCovered().contains(cell)) {
                         alternative(cell);
                     }
+
+                    if (getCovered().contains(cell)) {
+                        change++;
+                    }
+
                 }
             }
 
-            if (!change && !logicInference) {
+            if (change >= getRowSize() * getColumnSize()) {
                 printFinal(0);
             }
         }
@@ -84,7 +90,7 @@ public class IntermediateAgent extends BeginnerAgent {
         for (int i = 0; i < cells.size(); i++) {
             System.out.println("INSIDE CREATE KBU: "+ cells.get(i).getR() + " , "+ cells.get(i).getC());
             String logicOptions = getLogicOptions(cells.get(i));
-            System.out.println(logicOptions);
+//            System.out.println(logicOptions);
 //            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
             kbu += logicOptions; // add logic option in kbu for current cell.
 
@@ -117,7 +123,7 @@ public class IntermediateAgent extends BeginnerAgent {
         }
 
         tempKBU = kbu + entailment;
-        System.out.println("\n" + tempKBU);
+//        System.out.println("\n" + tempKBU);
 
         try {
             Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
@@ -199,8 +205,6 @@ public class IntermediateAgent extends BeginnerAgent {
         }
     }
 
-
-
     /**
      * Get all the cells that are uncovered but have at least one neighbour that is covered.
      * Those are the cells that we will be using inference to explore further.
@@ -216,11 +220,8 @@ public class IntermediateAgent extends BeginnerAgent {
                 }
             }
         }
-
         return cells;
     }
-
-
 
     /**
      * Get all the options available from a cell in a logic sentence.
@@ -286,7 +287,7 @@ public class IntermediateAgent extends BeginnerAgent {
      * Uncover or mark cells, depending on the result returned by LogicNG.
      *
      * @param result the result returned by LogicNG.
-     * @param cell   the cell to be uncovered or maked.
+     * @param cell   the cell to be uncovered or marked.
      */
     private boolean uncoverCell(Tristate result, Cell cell) {
 
@@ -300,6 +301,12 @@ public class IntermediateAgent extends BeginnerAgent {
         return false;
     }
 
+    /**
+     * Marks a cell as a mine.
+     * @param result the result returned by LogicNG.
+     * @param cell the cell to be uncovered or marked.
+     * @return
+     */
     private boolean markCell(Tristate result, Cell cell) {
         // if result equals FALSE, then mark as danger!
         if (result.equals(Tristate.FALSE)) {

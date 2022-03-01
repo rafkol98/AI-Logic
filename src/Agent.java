@@ -16,6 +16,8 @@ public abstract class Agent {
     private ArrayList<Cell> uncovered, markedMines;
     private int rowSize, columnSize;
 
+    int change = 0;
+
 
     public Agent(char[][] board, boolean verbose) {
         this.verbose = verbose;
@@ -159,6 +161,7 @@ public abstract class Agent {
     public void uncover(int r, int c) {
         // Ask game about the value of the same coordinates but from real board.
         Cell probedCell = game.getCell(r, c);
+        change = 0;
 
         // if the probed cell is not a blocked cell and was not already probed, then proceed to uncover it to the agent.
         if (!blocked.contains(probedCell) && !uncovered.contains(probedCell)) {
@@ -285,6 +288,7 @@ public abstract class Agent {
      * @param c the column of the cell.
      */
     public void markCell(int r, int c) {
+        change = 0;
         knownWorld[r][c].setValue('*');
         markedMines.add(knownWorld[r][c]);
     }
