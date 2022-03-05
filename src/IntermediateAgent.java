@@ -1,4 +1,3 @@
-import jdk.swing.interop.SwingInterOpUtils;
 import org.logicng.datastructures.Tristate;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -33,10 +32,8 @@ public class IntermediateAgent extends BeginnerAgent {
         while (!getCovered().isEmpty()) {
             for (int r = 0; r < getKnownWorld().length; r++) {
                 for (int c = 0; c < getKnownWorld()[0].length; c++) {
-//                    change = false;
-//                    logicInference = false;
-                    System.out.println(r + " ,,, "+c);
                     Cell cell = getKnownWorld()[r][c];
+
                     // if
                     if (getCovered().contains(cell)) {
                         sps(r, c);
@@ -46,14 +43,14 @@ public class IntermediateAgent extends BeginnerAgent {
                         alternative(cell);
                     }
 
+                    // if the cell is still covered (no changes), then increment counter.
                     if (getCovered().contains(cell)) {
-                        change++;
+                        counter++;
                     }
-
                 }
             }
 
-            if (change >= getRowSize() * getColumnSize()) {
+            if (counter >= getRowSize() * getColumnSize()) {
                 printFinal(0);
             }
         }
@@ -61,11 +58,16 @@ public class IntermediateAgent extends BeginnerAgent {
 
     /**
      * This method is called when the sps technique (implemented in the BeginnerAgent) can
-     * make no other decuctions. It uses the DNF encoding technique.
+     * make no other deductions. It uses the DNF encoding technique.
      */
     @Override
     public void alternative(Cell cell) {
+        // DNF Encoding Technique.
         ArrayList<Cell> cells = getSuitableCells();
+        System.out.println("SUITABLE CELLS");
+        for (Cell c : cells) {
+            System.out.println(c.getR()+ "  "+ c.getC());
+        }
         String kbu = createKBU(cells);  // create KBU.
 
         if (proveMineOrFree(cell, kbu, true)) {
@@ -78,20 +80,36 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
+     * Get all the cells that are uncovered but have at least one neighbour that is covered.
+     * Those are the cells that we will be using inference to explore further.
+     *
+     * Used for Logical inference and building the KBU in both intermediate agents.
+     */
+    public ArrayList<Cell> getSuitableCells() {
+        ArrayList<Cell> cells = new ArrayList<>();
+        for (int r = 0; r < getKnownWorld().length; r++) {
+            for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                // check if the cell has at least one covered neighbour and is uncovered.
+                if (getOnlyCoveredNeighbours(r, c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
+                    cells.add(getKnownWorld()[r][c]); // cell is suitable.
+                }
+            }
+        }
+        return cells;
+    }
+
+    /**
      * Create a Knowledge base of the unknowns (KBU) based on the suitable cells.
      *
      * @param cells the suitable cells for further exploration.
      * @return the KBU as a string.
      */
-    private String createKBU(ArrayList<Cell> cells) {
+    public String createKBU(ArrayList<Cell> cells) {
         String kbu = "";
 
         // Add the logic options for each cell in the KBU.
         for (int i = 0; i < cells.size(); i++) {
-            System.out.println("INSIDE CREATE KBU: "+ cells.get(i).getR() + " , "+ cells.get(i).getC());
-            String logicOptions = getLogicOptions(cells.get(i));
-//            System.out.println(logicOptions);
-//            System.out.println(cells.get(i).getR() + "," + cells.get(i).getC() + " logic: "+logicOptions);
+            String logicOptions = getLogic(cells.get(i));
             kbu += logicOptions; // add logic option in kbu for current cell.
 
             // Connect the logic options.
@@ -123,7 +141,6 @@ public class IntermediateAgent extends BeginnerAgent {
         }
 
         tempKBU = kbu + entailment;
-//        System.out.println("\n" + tempKBU);
 
         try {
             Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
@@ -147,17 +164,18 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
-     * Get all the possible sets that contain given mine count.
+     * Get all the possible sets of size equal to the remaining mines count.
      *
      * @param coveredNeighbours the neighbours that are covered.
-     * @param minesCount        the count of mines.
+     * @param remainingMines        the count of mines.
      * @return an ArrayList containing an inner ArrayList with all the possible sets.
      */
-    private static ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int minesCount) {
+    private ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int remainingMines) {
         ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
 
-        possibleMinesSets.removeIf(set -> set.size() != minesCount); // remove the sets that do not have the mines count size.
+        possibleMinesSets.removeIf(set -> set.size() != remainingMines); // remove the sets that do not have the mines count size.
 
+        System.out.println("REMAINING MINES "+remainingMines);
         return possibleMinesSets;
     }
 
@@ -168,7 +186,7 @@ public class IntermediateAgent extends BeginnerAgent {
      * @param coveredNeighbours the covered neighbours given.
      * @return all the possible permutations
      */
-    private static ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
+    private ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
         ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
 
         // When empty, return sets.
@@ -189,7 +207,8 @@ public class IntermediateAgent extends BeginnerAgent {
      * @param sets              the sets to be filled.
      * @param coveredNeighbours the covered neighbours given.
      */
-    private static void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
+    private void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
+        //TODO: check here mines count statement.
         Cell top = coveredNeighbours.get(0);
         ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
 
@@ -206,42 +225,25 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
-     * Get all the cells that are uncovered but have at least one neighbour that is covered.
-     * Those are the cells that we will be using inference to explore further.
-     */
-    private ArrayList<Cell> getSuitableCells() {
-        ArrayList<Cell> cells = new ArrayList<>();
-        for (int r = 0; r < getKnownWorld().length; r++) {
-            for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                // check if the cell has at least one covered neighbour and is uncovered.
-                if (getOnlyCoveredNeighbours(r, c).size() >= 1 && getUncovered().contains(getKnownWorld()[r][c])) {
-                    System.out.println("UNCOVERED: " + r + " , "+ c );
-                    cells.add(getKnownWorld()[r][c]); // cell is suitable.
-                }
-            }
-        }
-        return cells;
-    }
-
-    /**
      * Get all the options available from a cell in a logic sentence.
      *
      * @param cell the cell to get the logic options of.
      * @return the options of that cell in a logic sentence.
      */
-    private String getLogicOptions(Cell cell) {
+    private String getLogic(Cell cell) {
         String logicOptions = "";
-
+        System.out.println("LOGIC FOR: "+ cell.getR() + " "+cell.getC());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
-        System.out.println("numberof marked mines neighbours" +numberOfMarkedMinesNeighbours);
-
         // Unmarked mines = clue - numberOfMarkedMines.
+        // get number of mines not marked yet.
         int remainingMines = Integer.parseInt(String.valueOf(cell.getValue())) - numberOfMarkedMinesNeighbours;
-
-        System.out.println("remaining mines" +remainingMines);
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
+
+        //TODO: REMOVE DEBUG.
+        System.out.println("mines pos sets "+minesPosSets);
+
 
         if (minesPosSets.size() > 0) {
             // Initialise logic connectors.
@@ -249,25 +251,28 @@ public class IntermediateAgent extends BeginnerAgent {
             String andInner = " " + AND + " ";
             String connectOptions = " " + OR + " (";
 
-            System.out.println(minesPosSets.size());
-
             logicOptions += "(";
 
-            // iterate through the sets.
+            // iterate through the inner sets.
             for (int i = 0; i < minesPosSets.size(); i++) {
                 // Connect the different options with an OR.
                 if (i != 0) {
                     logicOptions += connectOptions;
                 }
 
-                // Iterate through the covered neighbours, to add inner elements.
+                //TODO: piani ta akalifta tou protou set. dame je kamni sindiasmous.
+
+                // Iterate through the covered neighbours, to add inner element combinations.
                 for (int x = 0; x < coveredNeighbours.size(); x++) {
                     Cell neighbour = coveredNeighbours.get(x); // get neighbour.
-                    // Connect the different options with an AND.
+                    System.out.println("-- covered neighbour -- "+ neighbour.toString());
+
+                    // Connect the different options with an AND (if not the beginning).
                     if (x != 0) {
                         logicOptions += andInner;
                     }
-                    // Check the bigger set if it does not contain neighbour. If not then append the NOT symbol.
+                    System.out.println("DOES "+minesPosSets.get(i)+" CONTAIN "+ neighbour+" ? \n");
+                    // Check if the current set does not contain neighbour. If not then append the NOT symbol.
                     if (!minesPosSets.get(i).contains(neighbour)) {
                         logicOptions += NOT;
                     }
@@ -275,10 +280,13 @@ public class IntermediateAgent extends BeginnerAgent {
                     logicOptions += "M" + neighbour.getR() + neighbour.getC();
                 }
                 logicOptions += ")";
+
+                System.out.println(logicOptions +" \n\n");
             }
             logicOptions += ")";
         }
 
+        System.out.println(logicOptions);
         return logicOptions;
     }
 

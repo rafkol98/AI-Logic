@@ -117,4 +117,9 @@ public class Cell {
     public int hashCode() {
         return Objects.hash(r, c);
     }
+
+    @Override
+    public String toString() {
+        return "Cell{" + r + "," + c +'}';
+    }
 }
