@@ -30,33 +30,18 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         System.out.println("LOGIC FOR: "+cell);
 
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
-        int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
-
-
-//        // Unmarked mines = clue - numberOfMarkedMines.
-//        // get number of mines not marked yet.
-//        int remainingMines = Integer.parseInt(String.valueOf(cell.getValue())) - numberOfMarkedMinesNeighbours;
-        ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, 2);
 
         int k = cell.getValueInt();
         int sizeAtMost = k + 1;
-        System.out.println("at most: "+sizeAtMost);
+        System.out.println(sizeAtMost);
         ArrayList<ArrayList<Cell>> atMostSet = minesPossibleSets(coveredNeighbours, sizeAtMost);
-        System.out.println("AT MOST SET: "+atMostSet);
 
         int sizeAtMostNot = coveredNeighbours.size() - k;
-        System.out.println("at most not: "+sizeAtMostNot);
+        System.out.println(sizeAtMostNot);
         ArrayList<ArrayList<Cell>> atMostNotSet = minesPossibleSets(coveredNeighbours, sizeAtMostNot);
-
-        atMostNot(atMostNotSet);
 
 
         logicOptions += atMost(atMostSet) + AND + " " + atMostNot(atMostNotSet);
-
-        System.out.println("OLD METHOD: "+ atMost(minesPosSets) + AND + " " + atMostNot(minesPosSets));
-//
-
-        System.out.println(logicOptions+"\n\n");
 
         return logicOptions;
     }
