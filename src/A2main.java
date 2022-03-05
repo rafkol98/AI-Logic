@@ -26,7 +26,7 @@ public class A2main {
 		case "P3":
 			agent = new IntermediateAgent(board, verbose);
 		case "P4":
-			//TODO: Part 4
+			agent = new IntermediateAgentCNF(board, verbose);
 		case "P5":
 			//TODO: Part 5
 		}

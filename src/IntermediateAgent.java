@@ -11,9 +11,9 @@ import java.util.ArrayList;
 public class IntermediateAgent extends BeginnerAgent {
 
     // Initialise logic variables.
-    private final String AND = "&";
-    private final String OR = "|";
-    private final String NOT = "~";
+    public final String AND = "&";
+    public final String OR = "|";
+    public final String NOT = "~";
 
     boolean logicInference = false;
 
@@ -64,10 +64,13 @@ public class IntermediateAgent extends BeginnerAgent {
     public void alternative(Cell cell) {
         // DNF Encoding Technique.
         ArrayList<Cell> cells = getSuitableCells();
+
+        //TODO: remove debugs.
         System.out.println("SUITABLE CELLS");
         for (Cell c : cells) {
             System.out.println(c.getR()+ "  "+ c.getC());
         }
+
         String kbu = createKBU(cells);  // create KBU.
 
         if (proveMineOrFree(cell, kbu, true)) {
@@ -112,6 +115,7 @@ public class IntermediateAgent extends BeginnerAgent {
             String logicOptions = getLogic(cells.get(i));
             kbu += logicOptions; // add logic option in kbu for current cell.
 
+            //TODO: might have to do a separate function for the connectors - different for CNF.
             // Connect the logic options.
             // If its the last element, then don't add an AND sign.
             if (i != cells.size() - 1 && logicOptions.length() >= 1) {
@@ -167,26 +171,25 @@ public class IntermediateAgent extends BeginnerAgent {
      * Get all the possible sets of size equal to the remaining mines count.
      *
      * @param coveredNeighbours the neighbours that are covered.
-     * @param remainingMines        the count of mines.
+     * @param setSize        if DNF the set size is equal to the count of mines. If CNF then the set size is equal to 2.
      * @return an ArrayList containing an inner ArrayList with all the possible sets.
      */
-    private ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int remainingMines) {
+    public ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int setSize) {
         ArrayList<ArrayList<Cell>> possibleMinesSets = permutations(coveredNeighbours);
 
-        possibleMinesSets.removeIf(set -> set.size() != remainingMines); // remove the sets that do not have the mines count size.
+        possibleMinesSets.removeIf(set -> set.size() != setSize); // remove the sets that do not have the mines count size.
 
-        System.out.println("REMAINING MINES "+remainingMines);
         return possibleMinesSets;
     }
 
     /**
-     * TODO: improve comments
+     * TODO: improve comments - MAKE PRIVATE (MAYBE)
      * Get all the possible permutations for given covered neighbours.
      *
      * @param coveredNeighbours the covered neighbours given.
      * @return all the possible permutations
      */
-    private ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
+    public ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
         ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
 
         // When empty, return sets.
@@ -230,7 +233,7 @@ public class IntermediateAgent extends BeginnerAgent {
      * @param cell the cell to get the logic options of.
      * @return the options of that cell in a logic sentence.
      */
-    private String getLogic(Cell cell) {
+    public String getLogic(Cell cell) {
         String logicOptions = "";
         System.out.println("LOGIC FOR: "+ cell.getR() + " "+cell.getC());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
