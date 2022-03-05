@@ -18,9 +18,9 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         System.out.println("MESA");
         // CNF Technique.
         ArrayList<Cell> cells = getSuitableCells();
-//        System.out.println("Suitable cells "+cells+"\n");
         String kbu = createKBU(cells);  // create KBU.
         System.out.println(kbu);
+
     }
 
     @Override
@@ -32,21 +32,24 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
 
         int k = cell.getValueInt();
-        int sizeAtMost = k + 1;
-        System.out.println(sizeAtMost);
+        int sizeAtMost = k + 1; // size of sets to consider for atMostDangers. At most is "number of clue" + 1.
         ArrayList<ArrayList<Cell>> atMostSet = minesPossibleSets(coveredNeighbours, sizeAtMost);
 
-        int sizeAtMostNot = coveredNeighbours.size() - k;
-        System.out.println(sizeAtMostNot);
-        ArrayList<ArrayList<Cell>> atMostNotSet = minesPossibleSets(coveredNeighbours, sizeAtMostNot);
+        int sizeAtMostNon = coveredNeighbours.size() - k; //  size of sets to consider for atMostNonDangers - number of covered neighbours - clue.
+        ArrayList<ArrayList<Cell>> atMostNotSet = minesPossibleSets(coveredNeighbours, sizeAtMostNon);
 
-
-        logicOptions += atMost(atMostSet) + AND + " " + atMostNot(atMostNotSet);
+        logicOptions += atMostDangers(atMostSet) + AND + " " + atMostNonDangers(atMostNotSet);
 
         return logicOptions;
     }
 
-    private String atMost(ArrayList<ArrayList<Cell>> possibleSets) {
+
+    /**
+     * At most given sets n
+     * @param possibleSets
+     * @return
+     */
+    private String atMostDangers(ArrayList<ArrayList<Cell>> possibleSets) {
         String logicOptions = "";
         // iterate through the possible sets.
         for (int i=0; i<possibleSets.size(); i++) {
@@ -73,7 +76,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     }
 
 
-    private String atMostNot(ArrayList<ArrayList<Cell>> possibleSets) {
+    private String atMostNonDangers(ArrayList<ArrayList<Cell>> possibleSets) {
         ArrayList<Cell> combined = putInOne(possibleSets);
 
         String logicOptions = "(";
