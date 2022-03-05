@@ -241,7 +241,7 @@ public class IntermediateAgent extends BeginnerAgent {
 
         // Unmarked mines = clue - numberOfMarkedMines.
         // get number of mines not marked yet.
-        int remainingMines = Integer.parseInt(String.valueOf(cell.getValue())) - numberOfMarkedMinesNeighbours;
+        int remainingMines = cell.getValueInt() - numberOfMarkedMinesNeighbours;
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
 
         //TODO: REMOVE DEBUG.

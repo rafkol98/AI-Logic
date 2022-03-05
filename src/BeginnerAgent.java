@@ -78,7 +78,7 @@ public class BeginnerAgent extends Agent {
                 minesCount++;
             }
         }
-        int clue = Integer.parseInt(String.valueOf(cell.getValue()));
+        int clue = cell.getValueInt();
         return (clue == minesCount);
     }
 
@@ -104,7 +104,7 @@ public class BeginnerAgent extends Agent {
             }
         }
 
-        int clue = Integer.parseInt(String.valueOf(cell.getValue())); // make the clue being an integer.
+        int clue = cell.getValueInt(); // make the clue being an integer.
         return (coveredCount == clue - minesCount);
     }
 

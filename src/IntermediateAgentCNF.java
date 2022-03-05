@@ -37,13 +37,14 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 //        int remainingMines = Integer.parseInt(String.valueOf(cell.getValue())) - numberOfMarkedMinesNeighbours;
 //        ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, 2);
 
-        int k = cell.getValue();
+        int k = cell.getValueInt();
         int sizeAtMost = k + 1;
         System.out.println(sizeAtMost);
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, sizeAtMost);
         System.out.println("AT MOST: "+minesPosSets);
 
         int sizeAtMostNot = coveredNeighbours.size() - k;
+        System.out.println("at most not: "+sizeAtMostNot);
         ArrayList<ArrayList<Cell>> minesPosSetsNOT = minesPossibleSets(coveredNeighbours, sizeAtMostNot);
         System.out.println("AT MOST NON: "+minesPosSetsNOT);
 
