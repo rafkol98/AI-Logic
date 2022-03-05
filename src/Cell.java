@@ -101,6 +101,10 @@ public class Cell {
         return value;
     }
 
+    public int getValueInt() {
+        return Integer.parseInt(String.valueOf(getValue()));
+    }
+
     public void setValue(char value) {
         this.value = value;
     }
