@@ -157,28 +157,34 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     public String getLogic(Cell cell) {
         String logicOptions = "";
 
+        System.out.println("\n\nEXAMINING "+cell.toString());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
 
         int k = cell.getValueInt();
-        int sizeAtMost = k + 1; // size of sets to consider for atMostDangers. At most is "number of clue" + 1.
-        ArrayList<ArrayList<Cell>> atMostSet = minesPossibleSets(coveredNeighbours, sizeAtMost);
+        int sizeSubsetDangers = k + 1; // size of sets to consider for atMost. At most is "number of clue" + 1.
+        System.out.println("size subset atMost "+sizeSubsetDangers);
+        ArrayList<ArrayList<Cell>> atMostSet = minesPossibleSets(coveredNeighbours, sizeSubsetDangers);
+        System.out.println("atMost set:"+atMostSet);
 
-        int sizeAtMostNon = coveredNeighbours.size() - k; //  size of sets to consider for atMostNonDangers - number of covered neighbours - clue.
-        ArrayList<ArrayList<Cell>> atMostNotSet = minesPossibleSets(coveredNeighbours, sizeAtMostNon);
+        int sizeSubsetNonDangers = (coveredNeighbours.size() - k) +1; //  size of sets to consider for atLeast - number of covered neighbours - clue.
+        System.out.println("\nsize subset atLeast" + sizeSubsetNonDangers);
 
-        logicOptions += atMostDangers(atMostSet) + AND + " " + atMostNonDangers(atMostNotSet);
+        ArrayList<ArrayList<Cell>> atLeastSet = minesPossibleSets(coveredNeighbours, sizeSubsetNonDangers);
+        System.out.println("atLeast set:"+atLeastSet+"\n");
+
+        logicOptions += atMost(atMostSet) + AND + " " + atLeast(atLeastSet);
 
         return logicOptions;
     }
 
 
     /**
-     * At most given sets n
+     * For all k+1 size subsets given, at least one is NOT a mine.
      *
      * @param possibleSets
      * @return
      */
-    private String atMostDangers(ArrayList<ArrayList<Cell>> possibleSets) {
+    private String atMost(ArrayList<ArrayList<Cell>> possibleSets) {
         String logicOptions = "";
         // iterate through the possible sets.
         for (int i = 0; i < possibleSets.size(); i++) {
@@ -202,43 +208,74 @@ public class IntermediateAgentCNF extends IntermediateAgent {
                 logicOptions += AND + " ";
             }
         }
-
+        System.out.println("at most: "+logicOptions);
         return logicOptions;
     }
 
 
-    private String atMostNonDangers(ArrayList<ArrayList<Cell>> possibleSets) {
-        ArrayList<Cell> combined = putInOne(possibleSets);
+    /**
+     * For all k sized subsets
+     * @param possibleSets
+     * @return
+     */
+    private String atLeast(ArrayList<ArrayList<Cell>> possibleSets) {
+        String logicOptions = "";
+        // iterate through the possible sets.
+        for (int i = 0; i < possibleSets.size(); i++) {
+            ArrayList<Cell> set = possibleSets.get(i);
 
-        String logicOptions = "(";
-        String clause = "";
-        for (int i = 0; i < combined.size(); i++) {
-            clause += "M" + combined.get(i).getR() + combined.get(i).getC();
+            // Iterate through the set and create disjunctions.
+            logicOptions += "(";
+            String clause = "";
+            for (int x = 0; x < set.size(); x++) {
+                clause += "M" + set.get(x).getR() + set.get(x).getC();
 
-            // if its not the last element then connect them with an AND.
-            if (i != (combined.size() - 1)) {
-                clause += " " + OR + " ";
+                if (x != (set.size() - 1)) {
+                    clause += " " + OR + " ";
+                }
+            }
+            logicOptions += clause;
+            logicOptions += ") ";
+
+            // Add conjunction of disjunctions.
+            if (i != (possibleSets.size() - 1)) {
+                logicOptions += AND + " ";
             }
         }
-        logicOptions += clause;
-        logicOptions += ")";
-
-
+        System.out.println("at least: "+logicOptions);
         return logicOptions;
+
+
+
+//        String logicOptions = "(";
+//        String clause = "";
+//        for (int i = 0; i < combined.size(); i++) {
+//            clause += "M" + combined.get(i).getR() + combined.get(i).getC();
+//
+//            // if its not the last element then connect them with an AND.
+//            if (i != (combined.size() - 1)) {
+//                clause += " " + OR + " ";
+//            }
+//        }
+//        logicOptions += clause;
+//        logicOptions += ")";
+//
+//        System.out.println("NON: "+logicOptions);
+//        return logicOptions;
     }
 
 
-    private ArrayList<Cell> putInOne(ArrayList<ArrayList<Cell>> sets) {
-        Set<Cell> setx = new HashSet<Cell>();
-
-        for (ArrayList<Cell> set : sets) {
-            for (Cell cell : set) {
-                setx.add(cell);
-            }
-        }
-
-        return new ArrayList<Cell>(setx);
-    }
+//    private ArrayList<Cell> putInOne(ArrayList<ArrayList<Cell>> sets) {
+//        Set<Cell> setx = new HashSet<Cell>();
+//
+//        for (ArrayList<Cell> set : sets) {
+//            for (Cell cell : set) {
+//                setx.add(cell);
+//            }
+//        }
+//
+//        return new ArrayList<Cell>(setx);
+//    }
 
     /**
      * TODO: improve comments
