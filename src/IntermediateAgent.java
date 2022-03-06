@@ -150,10 +150,14 @@ public class IntermediateAgent extends BeginnerAgent {
             SATSolver miniSat = MiniSat.miniSat(f); // initialise SAT solver.
             miniSat.add(formula); // add the formula to the miniSAT solver.
             Tristate result = miniSat.sat(); // Get the entailement result.
+
+            boolean entailed = result.equals(Tristate.TRUE) ? true : false; // create a boolean variable to determine entailment.
+
+
             if (proveMine) {
-                return markCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                return markCell(entailed, cell); // uncover or mark cell depending on the inference made by LogicNG.
             } else {
-                return uncoverCell(result, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                return uncoverCell(entailed, cell); // uncover or mark cell depending on the inference made by LogicNG.
             }
 
         } catch (ParserException e) {
@@ -296,13 +300,12 @@ public class IntermediateAgent extends BeginnerAgent {
      * TODO: improve comments
      * Uncover or mark cells, depending on the result returned by LogicNG.
      *
-     * @param result the result returned by LogicNG.
+     * @param entailment the result returned by LogicNG.
      * @param cell   the cell to be uncovered or marked.
      */
-    private boolean uncoverCell(Tristate result, Cell cell) {
-
+    public boolean uncoverCell(boolean entailment, Cell cell) {
         // if result equals FALSE, then the cell is safe, uncover.
-        if (result.equals(Tristate.FALSE)) {
+        if (!entailment) {
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
             logicInference = true;
@@ -313,13 +316,13 @@ public class IntermediateAgent extends BeginnerAgent {
 
     /**
      * Marks a cell as a mine.
-     * @param result the result returned by LogicNG.
+     * @param entailment the result returned by LogicNG.
      * @param cell the cell to be uncovered or marked.
      * @return
      */
-    private boolean markCell(Tristate result, Cell cell) {
+    public boolean markCell(boolean entailment, Cell cell) {
         // if result equals FALSE, then mark as danger!
-        if (result.equals(Tristate.FALSE)) {
+        if (!entailment) {
             markCell(cell.getR(), cell.getC()); // mark cell.
             worldChangedOuput();
             logicInference = true;
