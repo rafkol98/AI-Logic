@@ -127,10 +127,9 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
-     * Iterate through the covered cells and determine for each one
-     * whether they contain a mine or not.
+     * Determine whether the passed in cell should be uncovered or marked as mine - using Logical Inference.
      */
-    private boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
+    public boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
         String entailment;
         String tempKBU = "";
 
