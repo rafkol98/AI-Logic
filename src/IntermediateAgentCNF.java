@@ -1,4 +1,3 @@
-
 import org.sat4j.core.VecInt;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.specs.ContradictionException;
@@ -21,8 +20,9 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
     /**
      * Determine whether the passed in cell should be uncovered or marked as mine - using Logical Inference.
-     * @param cell the cell being examined.
-     * @param kbu the knowledge base of unknowns.
+     *
+     * @param cell      the cell being examined.
+     * @param kbu       the knowledge base of unknowns.
      * @param proveMine flag that determines whether to try to prove cell is a mine. If false then try to prove cell
      *                  is free.
      */
@@ -32,12 +32,12 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
         // if the proveMine flag is true, then we want to entail whether the cell is a mine.
         if (proveMine) {
-            entailment = " " + AND + " (" + NOT + "M" + cell.getR() + cell.getC()+")";
+            entailment = " " + AND + " (" + NOT + "M" + cell.getR() + cell.getC() + ")";
         } else {
-            entailment = " " + AND + " (M" + cell.getR() + cell.getC()+")";
+            entailment = " " + AND + " (M" + cell.getR() + cell.getC() + ")";
         }
 
-        String tempKBU = kbu + entailment;
+        String tempKBU = kbu + entailment; // add entailment to the KBU.
 
         ArrayList<int[]> clausesDimacs = dimacs(tempKBU); // get clauses in arrays of ints - dimacs format.
 
@@ -54,6 +54,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
             IProblem problem = solver;
 
+            // if prove mine flag is true then try to mark cell, otherwise uncover cell.
             if (proveMine) {
                 return markCell(problem.isSatisfiable(), cell); // mark cell - depending on the inference.
             } else {
@@ -69,6 +70,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
     /**
      * Convert KBU into dimacs format clauses (in an arraylist of ints).
+     *
      * @param kbu
      * @return
      */
@@ -97,12 +99,12 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             }
             clauses.add(inner.stream().mapToInt(i -> i).toArray());  // Add the clause in the clauses ArrayList.
         }
-
         return clauses;
     }
 
     /**
      * Create a new KBU where each proposition is replaced by its corresponding dimacs integer encoding.
+     *
      * @param kbu
      * @return
      */
@@ -118,11 +120,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             // replace not with minus sign.
             updatedKBU = updatedKBU.replaceAll("~", "-");
         }
-
         return updatedKBU;
-
     }
-
 
     /**
      * Maps a proposition (e.g., M10) to an integer value (e.g., 1).
@@ -144,12 +143,12 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         // Create a new map to assign each proposition ot an integer.
         HashMap<String, Integer> map = new HashMap<String, Integer>();
 
-        int count = 1;
+        // Assign each proposition a number.
+        int propositionNumber = 1;
         for (String proposition : propositions) {
-            map.put(proposition, count);
-            count++;
+            map.put(proposition, propositionNumber);
+            propositionNumber++;
         }
-
         return map;
     }
 
@@ -157,22 +156,16 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     public String getLogic(Cell cell) {
         String logicOptions = "";
 
-        System.out.println("\n\nEXAMINING "+cell.toString());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
 
-        int k = cell.getValueInt();
-        int sizeSubsetDangers = k + 1; // size of sets to consider for atMost. At most is "number of clue" + 1.
-        System.out.println("size subset atMost "+sizeSubsetDangers);
-        ArrayList<ArrayList<Cell>> atMostSet = minesPossibleSets(coveredNeighbours, sizeSubsetDangers);
-        System.out.println("atMost set:"+atMostSet);
+        int clue = cell.getValueInt();
+        int sizeSubsetAtMost = clue + 1; // size of sets to consider for atMost. At most is "number of clue" + 1.
+        ArrayList<ArrayList<Cell>> atMostSet = minesPossibleSets(coveredNeighbours, sizeSubsetAtMost); // get possible sets for atMost.
 
-        int sizeSubsetNonDangers = (coveredNeighbours.size() - k) +1; //  size of sets to consider for atLeast - number of covered neighbours - clue.
-        System.out.println("\nsize subset atLeast" + sizeSubsetNonDangers);
+        int sizeSubsetAtLeast = (coveredNeighbours.size() - clue) + 1; //  size of sets to consider for atLeast - number of covered neighbours - clue.
+        ArrayList<ArrayList<Cell>> atLeastSet = minesPossibleSets(coveredNeighbours, sizeSubsetAtLeast); // get possible sets for atLeast.
 
-        ArrayList<ArrayList<Cell>> atLeastSet = minesPossibleSets(coveredNeighbours, sizeSubsetNonDangers);
-        System.out.println("atLeast set:"+atLeastSet+"\n");
-
-        logicOptions += atMost(atMostSet) + AND + " " + atLeast(atLeastSet);
+        logicOptions += atMostOrLeast(atMostSet, true) + AND + " " + atMostOrLeast(atLeastSet, false); // connect the sets returned by the atMost and atLeast.
 
         return logicOptions;
     }
@@ -182,9 +175,10 @@ public class IntermediateAgentCNF extends IntermediateAgent {
      * For all k+1 size subsets given, at least one is NOT a mine.
      *
      * @param possibleSets
+     * @param most if true, then use atMost otherwise use atLeast.
      * @return
      */
-    private String atMost(ArrayList<ArrayList<Cell>> possibleSets) {
+    private String atMostOrLeast(ArrayList<ArrayList<Cell>> possibleSets, boolean most) {
         String logicOptions = "";
         // iterate through the possible sets.
         for (int i = 0; i < possibleSets.size(); i++) {
@@ -194,7 +188,12 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             logicOptions += "(";
             String clause = "";
             for (int x = 0; x < set.size(); x++) {
-                clause += NOT + "M" + set.get(x).getR() + set.get(x).getC();
+                if (most) {
+                    clause += NOT + "M" + set.get(x).getR() + set.get(x).getC();
+                } else {
+                    clause += "M" + set.get(x).getR() + set.get(x).getC();
+                }
+
 
                 if (x != (set.size() - 1)) {
                     clause += " " + OR + " ";
@@ -208,43 +207,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
                 logicOptions += AND + " ";
             }
         }
-        System.out.println("at most: "+logicOptions);
+        System.out.println("at most: " + logicOptions);
         return logicOptions;
     }
-
-
-    /**
-     * For all k sized subsets
-     * @param possibleSets
-     * @return
-     */
-    private String atLeast(ArrayList<ArrayList<Cell>> possibleSets) {
-        String logicOptions = "";
-        // iterate through the possible sets.
-        for (int i = 0; i < possibleSets.size(); i++) {
-            ArrayList<Cell> set = possibleSets.get(i);
-
-            // Iterate through the set and create disjunctions.
-            logicOptions += "(";
-            String clause = "";
-            for (int x = 0; x < set.size(); x++) {
-                clause += "M" + set.get(x).getR() + set.get(x).getC();
-
-                if (x != (set.size() - 1)) {
-                    clause += " " + OR + " ";
-                }
-            }
-            logicOptions += clause;
-            logicOptions += ") ";
-
-            // Add conjunction of disjunctions.
-            if (i != (possibleSets.size() - 1)) {
-                logicOptions += AND + " ";
-            }
-        }
-        System.out.println("at least: "+logicOptions);
-        return logicOptions;
-    }
-
 
 }
