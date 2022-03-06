@@ -1,10 +1,7 @@
-import jdk.swing.interop.SwingInterOpUtils;
-import org.sat4j.minisat.SolverFactory;
-import org.sat4j.specs.ISolver;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 public class IntermediateAgentCNF extends IntermediateAgent {
@@ -21,7 +18,95 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         String kbu = createKBU(cells);  // create KBU.
         System.out.println(kbu);
 
+        HashMap<String, Integer> meow = mapPropToInteger(kbu, "M[0-9][0-9]");
+        System.out.println(meow);
+
+        System.out.println(replaceInKBU(kbu, meow));
+        toDimacs(replaceInKBU(kbu, meow));
+//        System.out.println(clauses.get("M21 | M22"));
     }
+
+    public void toDimacs(String kbu) {
+        //TODO: arraylist of arraylists.
+        ArrayList<Integer[]> arr = new ArrayList<>();
+
+        // The first matcher removes brackets.
+        Matcher m = Pattern.compile("\\((.*?)\\) ").matcher(kbu);
+        while (m.find()) {
+            ArrayList<Integer> inner = new ArrayList<>();
+            String removedBrackets = m.group(1);
+            Pattern p = Pattern.compile("-?\\d+");
+
+            // The second matcher deletes finds integers.
+            Matcher m_2 = p.matcher(removedBrackets);
+            while (m_2.find()) {
+                // add in the inner arraylist.
+                inner.add(Integer.parseInt(m_2.group()));
+            }
+
+            System.out.println(inner.stream().toArray( n -> new Integer[n]));
+            Integer[] gg = inner.stream().toArray( n -> new Integer[n]);
+
+            for(int i=0; i<gg.length; i++) {
+                System.out.println(gg[i]);
+            }
+           arr.add(inner.stream().toArray( n -> new Integer[n]));
+        }
+
+        System.out.println(arr);
+
+    }
+
+    public String replaceInKBU(String kbu,  HashMap<String, Integer> map) {
+        String updatedKBU = kbu;
+
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            System.out.println(entry.getKey());
+            System.out.println(entry.getValue());
+            updatedKBU = updatedKBU.replaceAll(entry.getKey(), entry.getValue().toString());
+            updatedKBU = updatedKBU.replaceAll("~", "-");
+        }
+
+        return updatedKBU;
+
+    }
+    // READ STRING
+    // SPLIT IT AND FIND COMMON ELEMENTS
+    // PUT COMMON ELEMENTS IN A SET (TO ELIMINATE DUPLICATES)
+    // MAP A CELL TO A NUMBER.
+
+
+
+   // INSPIRED BY: https://stackoverflow.com/questions/5705111/how-to-get-all-substring-for-a-given-regex
+
+    /**
+     * Map a proposition to an integer.
+     * @param text
+     * @param regex
+     * @return
+     */
+    public HashMap<String, Integer> mapPropToInteger(String text, String regex) {
+
+        // Put all the elements in a set.
+        HashSet<String> propositions= new HashSet<String>();
+        Matcher m = Pattern.compile("(?=(" + regex + "))").matcher(text);
+        // while there are elements matching the regex passed in, p
+        while(m.find()) {
+            propositions.add(m.group(1));
+        }
+
+        // Create a new map to assign each proposition ot an integer.
+        HashMap<String, Integer> map = new HashMap<String, Integer>();
+
+        int count = 1;
+        for (String proposition : propositions) {
+            map.put(proposition, count);
+            count++;
+        }
+
+        return map;
+    }
+
 
     @Override
     public String getLogic(Cell cell) {
@@ -57,13 +142,15 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
             // Iterate through the set and create disjunctions.
             logicOptions += "(";
+            String clause = "";
             for (int x=0; x< set.size(); x++) {
-                logicOptions += NOT + "M" + set.get(x).getR() + set.get(x).getC();
+                clause += NOT + "M" + set.get(x).getR() + set.get(x).getC();
 
                 if (x != (set.size()-1)) {
-                    logicOptions +=  " " + OR + " ";
+                    clause +=  " " + OR + " ";
                 }
             }
+            logicOptions += clause;
             logicOptions += ") ";
 
             // Add conjunction of disjunctions.
@@ -80,15 +167,18 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         ArrayList<Cell> combined = putInOne(possibleSets);
 
         String logicOptions = "(";
+        String clause = "";
         for (int i=0; i< combined.size(); i++) {
-            logicOptions +=  "M" + combined.get(i).getR() + combined.get(i).getC();
+            clause +=  "M" + combined.get(i).getR() + combined.get(i).getC();
 
             // if its not the last element then connect them with an AND.
             if (i != (combined.size()-1)) {
-                logicOptions += " " + OR + " ";
+                clause += " " + OR + " ";
             }
         }
+        logicOptions += clause;
         logicOptions += ")";
+
 
         return logicOptions;
     }
