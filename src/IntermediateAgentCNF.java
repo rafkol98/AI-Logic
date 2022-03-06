@@ -1,7 +1,6 @@
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 
 public class IntermediateAgentCNF extends IntermediateAgent {
@@ -21,14 +20,17 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         HashMap<String, Integer> meow = mapPropToInteger(kbu, "M[0-9][0-9]");
         System.out.println(meow);
 
-        System.out.println(replaceInKBU(kbu, meow));
-        toDimacs(replaceInKBU(kbu, meow));
+        System.out.println(replace(kbu, meow));
+        toDimacs(replace(kbu, meow));
 //        System.out.println(clauses.get("M21 | M22"));
     }
 
     public void toDimacs(String kbu) {
-        //TODO: arraylist of arraylists.
-        ArrayList<Integer[]> arr = new ArrayList<>();
+        HashMap<String, Integer> propsAsInts = mapPropToInteger(kbu, "M[0-9][0-9]");
+        kbu = replace(kbu, propsAsInts); // replace the propositions in the kbu with integers.
+
+        // create a new Arraylist of integer arrays to store each clause.
+        ArrayList<Integer[]> clauses = new ArrayList<>();
 
         // The first matcher removes brackets.
         Matcher m = Pattern.compile("\\((.*?)\\) ").matcher(kbu);
@@ -50,20 +52,22 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             for(int i=0; i<gg.length; i++) {
                 System.out.println(gg[i]);
             }
-           arr.add(inner.stream().toArray( n -> new Integer[n]));
+           clauses.add(inner.stream().toArray( n -> new Integer[n]));
         }
 
-        System.out.println(arr);
+        System.out.println(clauses);
 
     }
 
-    public String replaceInKBU(String kbu,  HashMap<String, Integer> map) {
+    public String replace(String kbu, HashMap<String, Integer> map) {
         String updatedKBU = kbu;
 
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             System.out.println(entry.getKey());
             System.out.println(entry.getValue());
+            // replace proposition with integers.
             updatedKBU = updatedKBU.replaceAll(entry.getKey(), entry.getValue().toString());
+            // replace not with minus sign.
             updatedKBU = updatedKBU.replaceAll("~", "-");
         }
 
@@ -80,7 +84,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
    // INSPIRED BY: https://stackoverflow.com/questions/5705111/how-to-get-all-substring-for-a-given-regex
 
     /**
-     * Map a proposition to an integer.
+     * Maps a proposition (e.g., M10) to an integer value (e.g., 1).
      * @param text
      * @param regex
      * @return
