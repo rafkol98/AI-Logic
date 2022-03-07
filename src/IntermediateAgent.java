@@ -62,14 +62,15 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     @Override
     public void alternative(Cell cell) {
+        System.out.println("ALTERNATIVE: "+cell);
         // DNF Encoding Technique.
         ArrayList<Cell> cells = getSuitableCells();
 
-        //TODO: remove debugs.
-        System.out.println("SUITABLE CELLS");
-        for (Cell c : cells) {
-            System.out.println(c.getR()+ "  "+ c.getC());
-        }
+//        //TODO: remove debugs.
+//        System.out.println("SUITABLE CELLS");
+//        for (Cell c : cells) {
+//            System.out.println(c.getR()+ "  "+ c.getC());
+//        }
 
         String kbu = createKBU(cells);  // create KBU.
 
@@ -238,7 +239,7 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     public String getLogic(Cell cell) {
         String logicOptions = "";
-        System.out.println("LOGIC FOR: "+ cell.getR() + " "+cell.getC());
+//        System.out.println("LOGIC FOR: "+ cell.getR() + " "+cell.getC());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
@@ -247,9 +248,7 @@ public class IntermediateAgent extends BeginnerAgent {
         int remainingMines = cell.getValueInt() - numberOfMarkedMinesNeighbours;
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
 
-        //TODO: REMOVE DEBUG.
-        System.out.println("mines pos sets "+minesPosSets);
-
+//        System.out.println("mines pos sets "+minesPosSets);
 
         if (minesPosSets.size() > 0) {
             // Initialise logic connectors.
@@ -271,13 +270,13 @@ public class IntermediateAgent extends BeginnerAgent {
                 // Iterate through the covered neighbours, to add inner element combinations.
                 for (int x = 0; x < coveredNeighbours.size(); x++) {
                     Cell neighbour = coveredNeighbours.get(x); // get neighbour.
-                    System.out.println("-- covered neighbour -- "+ neighbour.toString());
+//                    System.out.println("-- covered neighbour -- "+ neighbour.toString());
 
                     // Connect the different options with an AND (if not the beginning).
                     if (x != 0) {
                         logicOptions += andInner;
                     }
-                    System.out.println("DOES "+minesPosSets.get(i)+" CONTAIN "+ neighbour+" ? \n");
+//                    System.out.println("DOES "+minesPosSets.get(i)+" CONTAIN "+ neighbour+" ? \n");
                     // Check if the current set does not contain neighbour. If not then append the NOT symbol.
                     if (!minesPosSets.get(i).contains(neighbour)) {
                         logicOptions += NOT;
@@ -287,12 +286,12 @@ public class IntermediateAgent extends BeginnerAgent {
                 }
                 logicOptions += ")";
 
-                System.out.println(logicOptions +" \n\n");
+//                System.out.println(logicOptions +" \n\n");
             }
             logicOptions += ")";
         }
 
-        System.out.println(logicOptions);
+//        System.out.println(logicOptions);
         return logicOptions;
     }
 

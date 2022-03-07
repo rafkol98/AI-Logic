@@ -32,14 +32,15 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
         // if the proveMine flag is true, then we want to entail whether the cell is a mine.
         if (proveMine) {
-            entailment = " " + AND + " (" + NOT + "M" + cell.getR() + cell.getC() + ")";
+            entailment =  AND + " (" + NOT + "M" + cell.getR() + cell.getC() + ")";
         } else {
-            entailment = " " + AND + " (M" + cell.getR() + cell.getC() + ")";
+            entailment = AND + " (M" + cell.getR() + cell.getC() + ")";
         }
 
         String tempKBU = kbu + entailment; // add entailment to the KBU.
 
         ArrayList<int[]> clausesDimacs = dimacs(tempKBU); // get clauses in arrays of ints - dimacs format.
+
 
         // Create solver.
         ISolver solver = SolverFactory.newDefault();
@@ -49,7 +50,19 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         try {
             // Add clauses to the solver.
             for (int[] clause : clausesDimacs) {
-                solver.addClause(new VecInt(clause));
+//                System.out.println(clause.length);
+                try{
+                    VecInt vecInt = new VecInt(clause);
+//                    System.out.println(vecInt.size());
+
+                    solver.addClause(vecInt);
+//                    System.out.println(Arrays.toString(clause));
+                } catch (ContradictionException e) {
+                    System.err.println("Contradiction when adding clause: " + Arrays.toString(clause));
+                    System.out.println(e.getCause());
+                    e.printStackTrace();
+                }
+
             }
 
             IProblem problem = solver;
@@ -61,7 +74,10 @@ public class IntermediateAgentCNF extends IntermediateAgent {
                 return uncoverCell(problem.isSatisfiable(), cell); // uncover cell - depending on the inference.
             }
 
-        } catch (TimeoutException | ContradictionException e) {
+        } catch (TimeoutException e) {
+
+
+            e.printStackTrace();
             System.out.println("There was a problem: " + e.getMessage());
         }
 
@@ -77,7 +93,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     public ArrayList<int[]> dimacs(String kbu) {
         // create a new Arraylist of integer arrays to store each clause.
         ArrayList<int[]> clauses = new ArrayList<>();
-
+        System.out.println("\n\n"+kbu);
 
         // Replace the propositions in the kbu with integers.
         kbu = replace(kbu);
@@ -158,14 +174,31 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
 
-        int clue = cell.getValueInt();
+        int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
+        int clue = cell.getValueInt() - numberOfMarkedMinesNeighbours;
+//        int clue = cell.getValueInt();
+
+        System.out.println(cell + " clue:"+clue+ "covered neighbours size:"+coveredNeighbours.size());
         int sizeSubsetAtMost = clue + 1; // size of sets to consider for atMost. At most is "number of clue" + 1.
         ArrayList<ArrayList<Cell>> atMostSet = minesPossibleSets(coveredNeighbours, sizeSubsetAtMost); // get possible sets for atMost.
 
         int sizeSubsetAtLeast = (coveredNeighbours.size() - clue) + 1; //  size of sets to consider for atLeast - number of covered neighbours - clue.
         ArrayList<ArrayList<Cell>> atLeastSet = minesPossibleSets(coveredNeighbours, sizeSubsetAtLeast); // get possible sets for atLeast.
 
-        logicOptions += atMostOrLeast(atMostSet, true) + AND + " " + atMostOrLeast(atLeastSet, false); // connect the sets returned by the atMost and atLeast.
+        String atMost = atMostOrLeast(atMostSet, true);
+        System.out.println("at most: "+atMost);
+        String atLeast = atMostOrLeast(atLeastSet, false);
+        System.out.println("at least: "+atLeast);
+
+        if(atMost.length() > 0 && atLeast.length() > 0) {
+            logicOptions += atMost + AND + " " +atLeast;
+        } else if (atLeast.length() > 0) {
+            logicOptions += atLeast;
+        }
+//        logicOptions +=
+//
+//        if (atMostOrLeast())
+//                atMostOrLeast(atMostSet, true) + AND + " " + atMostOrLeast(atLeastSet, false); // connect the sets returned by the atMost and atLeast.
 
         return logicOptions;
     }
@@ -184,31 +217,35 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         for (int i = 0; i < possibleSets.size(); i++) {
             ArrayList<Cell> set = possibleSets.get(i);
 
-            // Iterate through the set and create disjunctions.
-            logicOptions += "(";
-            String clause = "";
-            for (int x = 0; x < set.size(); x++) {
-                if (most) {
-                    clause += NOT + "M" + set.get(x).getR() + set.get(x).getC();
-                } else {
-                    clause += "M" + set.get(x).getR() + set.get(x).getC();
+            System.out.println("SET SIZE:"+set.size());
+            if (set.size() > 0) {
+                // Iterate through the set and create disjunctions.
+                logicOptions += "(";
+                String clause = "";
+                for (int x = 0; x < set.size(); x++) {
+                    if (most) {
+                        clause += NOT + "M" + set.get(x).getR() + set.get(x).getC();
+                    } else {
+                        clause += "M" + set.get(x).getR() + set.get(x).getC();
+                    }
+
+
+                    if (x != (set.size() - 1)) {
+                        clause += " " + OR + " ";
+                    }
                 }
+                logicOptions += clause;
+                logicOptions += ") ";
 
-
-                if (x != (set.size() - 1)) {
-                    clause += " " + OR + " ";
+                // Add conjunction of disjunctions.
+                if (i != (possibleSets.size() - 1)) {
+                    logicOptions += AND + " ";
                 }
-            }
-            logicOptions += clause;
-            logicOptions += ") ";
-
-            // Add conjunction of disjunctions.
-            if (i != (possibleSets.size() - 1)) {
-                logicOptions += AND + " ";
             }
         }
-        System.out.println("at most: " + logicOptions);
         return logicOptions;
     }
+
+
 
 }
