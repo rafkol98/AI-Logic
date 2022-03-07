@@ -66,13 +66,8 @@ public class IntermediateAgent extends BeginnerAgent {
         // DNF Encoding Technique.
         ArrayList<Cell> cells = getSuitableCells();
 
-//        //TODO: remove debugs.
-//        System.out.println("SUITABLE CELLS");
-//        for (Cell c : cells) {
-//            System.out.println(c.getR()+ "  "+ c.getC());
-//        }
-
         String kbu = createKBU(cells);  // create KBU.
+        System.out.println(kbu);
 
         if (proveMineOrFree(cell, kbu, true)) {
             System.out.println("Mine");
@@ -145,6 +140,7 @@ public class IntermediateAgent extends BeginnerAgent {
         }
 
         tempKBU = kbu + entailment;
+        System.out.println(tempKBU);
 
         try {
             Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
@@ -239,7 +235,7 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     public String getLogic(Cell cell) {
         String logicOptions = "";
-//        System.out.println("LOGIC FOR: "+ cell.getR() + " "+cell.getC());
+        System.out.println("LOGIC FOR: "+ cell.getR() + " "+cell.getC());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
@@ -248,7 +244,8 @@ public class IntermediateAgent extends BeginnerAgent {
         int remainingMines = cell.getValueInt() - numberOfMarkedMinesNeighbours;
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
 
-//        System.out.println("mines pos sets "+minesPosSets);
+//        System.out.println("minesPosSets "+minesPosSets);
+//        System.out.println("coveredNeighbours "+coveredNeighbours);
 
         if (minesPosSets.size() > 0) {
             // Initialise logic connectors.
@@ -291,7 +288,7 @@ public class IntermediateAgent extends BeginnerAgent {
             logicOptions += ")";
         }
 
-//        System.out.println(logicOptions);
+//        System.out.println(logicOptions+"\n\n");
         return logicOptions;
     }
 

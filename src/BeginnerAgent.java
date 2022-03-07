@@ -25,6 +25,7 @@ public class BeginnerAgent extends Agent {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
                 // if cell is covered check its adjacent neighbours.
                 if (getCovered().contains(getKnownWorld()[r][c])) {
+                    System.out.println("r"+r+ " c"+c);
                     sps(r, c);
                 }
             }
@@ -38,21 +39,23 @@ public class BeginnerAgent extends Agent {
      * @param c the column passed in.
      */
     public void sps(int r, int c) {
+        System.out.println("Cell in SPS: ("+r+ ","+c+")");
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
             //TODO: be consistent with getBlocked!!tc
             if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && neighbour.getValue() != 'b') {
-                System.out.println(neighbour.getR() + " xx "+neighbour.getC());
+                System.out.println("Nearby clue: ("+neighbour.getR() + ","+neighbour.getC()+")");
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
-                    System.out.println("AFN "+r+" , "+c);
+                    System.out.println("UNCOVER CELl");
+//                    System.out.println("AFN "+r+" , "+c);
                     uncover(r, c); // uncover cell.
                     worldChangedOuput();
 //                    change = true;
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
-                    System.out.println("AMN");
+                    System.out.println("MARK CELL!");
                     markCell(r, c);
                     worldChangedOuput();
 //                    change = true;
@@ -79,6 +82,8 @@ public class BeginnerAgent extends Agent {
             }
         }
         int clue = cell.getValueInt();
+        System.out.println("\nAFN: is clue ("+clue+") == minesCount (" + minesCount+") ?");
+        System.out.println(clue == minesCount);
         return (clue == minesCount);
     }
 
@@ -105,6 +110,8 @@ public class BeginnerAgent extends Agent {
         }
 
         int clue = cell.getValueInt(); // make the clue being an integer.
+        System.out.println("\nAMN: is coveredCount ("+coveredCount +") == clue (" + clue + ") minesCount (" + minesCount+") ?");
+        System.out.println(coveredCount == clue - minesCount);
         return (coveredCount == clue - minesCount);
     }
 

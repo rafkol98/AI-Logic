@@ -387,6 +387,11 @@ public abstract class Agent {
             System.out.println("Result: Agent not terminated");
         }
 
+        System.out.println("COVERED LEFT DEBUG: "+getCovered().size());
+        System.out.println("\n\nTOTAL BLOCKED CELLS: "+ game.getBlockedCells().size());
+        System.out.println("TOTAL MINES NO: "+ game.getTotalNumberMines());
+
+
         System.exit(0);
     }
 

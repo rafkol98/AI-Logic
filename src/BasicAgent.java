@@ -21,7 +21,6 @@ public class BasicAgent extends Agent{
                 // Check only NON-BLOCKED cells and those NOT-UNCOVERED yet.
                 if (getKnownWorld()[r][c].getValue() != 'b' && getKnownWorld()[r][c].getValue() == '?' && !containInList(r,c, getUncovered())) {
                     uncover(r, c);
-
                     worldChangedOuput();
                 }
             }
