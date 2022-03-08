@@ -24,34 +24,24 @@ public class IntermediateAgent extends BeginnerAgent {
 
     @Override
     public void probe() {
-        uncover(0, 0);
-        uncover(getCentreCell().getR(), getCentreCell().getC());
-        printAgentKnownWorld(false); // print the known world by the agent.
+        for (int r = 0; r < getKnownWorld().length; r++) {
+            for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                System.out.println("MESA");
+                Cell cell = getKnownWorld()[r][c];
 
-        // While there are cells that are covered, continue to look for inferences.
-        while (!getCovered().isEmpty()) {
-            for (int r = 0; r < getKnownWorld().length; r++) {
-                for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                    Cell cell = getKnownWorld()[r][c];
-
-                    // if
-                    if (getCovered().contains(cell)) {
-                        sps(r, c);
-                    }
-
-                    if (getCovered().contains(cell)) {
-                        alternative(cell);
-                    }
-
-                    // if the cell is still covered (no changes), then increment counter.
-                    if (getCovered().contains(cell)) {
-                        counter++;
-                    }
+                // if
+                if (getCovered().contains(cell)) {
+                    sps(r, c);
                 }
-            }
 
-            if (counter >= getRowSize() * getColumnSize()) {
-                printFinal(0);
+                if (getCovered().contains(cell)) {
+                    alternative(cell);
+                }
+
+                // if the cell is still covered (no changes), then increment counter.
+                if (getCovered().contains(cell)) {
+                    counter++;
+                }
             }
         }
     }
@@ -62,7 +52,7 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     @Override
     public void alternative(Cell cell) {
-        System.out.println("ALTERNATIVE: "+cell);
+        System.out.println("ALTERNATIVE: " + cell);
         // DNF Encoding Technique.
         ArrayList<Cell> cells = getSuitableCells();
 
@@ -81,7 +71,7 @@ public class IntermediateAgent extends BeginnerAgent {
     /**
      * Get all the cells that are uncovered but have at least one neighbour that is covered.
      * Those are the cells that we will be using inference to explore further.
-     *
+     * <p>
      * Used for Logical inference and building the KBU in both intermediate agents.
      */
     public ArrayList<Cell> getSuitableCells() {
@@ -171,7 +161,7 @@ public class IntermediateAgent extends BeginnerAgent {
      * Get all the possible sets of size equal to the remaining mines count.
      *
      * @param coveredNeighbours the neighbours that are covered.
-     * @param setSize        if DNF the set size is equal to the count of mines. If CNF then the set size is equal to 2.
+     * @param setSize           if DNF the set size is equal to the count of mines. If CNF then the set size is equal to 2.
      * @return an ArrayList containing an inner ArrayList with all the possible sets.
      */
     public ArrayList<ArrayList<Cell>> minesPossibleSets(ArrayList<Cell> coveredNeighbours, int setSize) {
@@ -235,7 +225,7 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     public String getLogic(Cell cell) {
         String logicOptions = "";
-        System.out.println("LOGIC FOR: "+ cell.getR() + " "+cell.getC());
+        System.out.println("LOGIC FOR: " + cell.getR() + " " + cell.getC());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
@@ -297,7 +287,7 @@ public class IntermediateAgent extends BeginnerAgent {
      * Uncover or mark cells, depending on the result returned by LogicNG.
      *
      * @param entailment the result returned by LogicNG.
-     * @param cell   the cell to be uncovered or marked.
+     * @param cell       the cell to be uncovered or marked.
      */
     public boolean uncoverCell(boolean entailment, Cell cell) {
         // if result equals FALSE, then the cell is safe, uncover.
@@ -312,8 +302,9 @@ public class IntermediateAgent extends BeginnerAgent {
 
     /**
      * Marks a cell as a mine.
+     *
      * @param entailment the result returned by LogicNG.
-     * @param cell the cell to be uncovered or marked.
+     * @param cell       the cell to be uncovered or marked.
      * @return
      */
     public boolean markCell(boolean entailment, Cell cell) {

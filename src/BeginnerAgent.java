@@ -10,37 +10,28 @@ public class BeginnerAgent extends Agent {
 
 
     @Override
-    public void alternative(Cell cell) {}
+    public void alternative(Cell cell) {
+    }
 
     /**
      * Probe cells using the Single Point Strategy.
      */
     @Override
     public void probe() {
-        uncover(0, 0);
-        uncover(getCentreCell().getR(), getCentreCell().getC());
-        printAgentKnownWorld(false); // print the known world by the agent.
-        // While there are cells that are covered, continue to look for inferences.
-        while (!getCovered().isEmpty()) {
-            for (int r = 0; r < getKnownWorld().length; r++) {
-                for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                    Cell cell = getKnownWorld()[r][c];
+        for (int r = 0; r < getKnownWorld().length; r++) {
+            for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                Cell cell = getKnownWorld()[r][c];
 
-                    // if cell is covered check its adjacent neighbours.
-                    if (getCovered().contains(cell)) {
-                        System.out.println("r" + r + " c" + c);
-                        sps(r, c);
-                    }
-
-                    // if the cell is still covered (no changes), then increment counter.
-                    if (getCovered().contains(cell)) {
-                        counter++;
-                    }
+                // if cell is covered check its adjacent neighbours.
+                if (getCovered().contains(cell)) {
+                    System.out.println("r" + r + " c" + c);
+                    sps(r, c);
                 }
-            }
 
-            if (counter >= getRowSize() * getColumnSize()) {
-                printFinal(0);
+                // if the cell is still covered (no changes), then increment counter.
+                if (getCovered().contains(cell)) {
+                    counter++;
+                }
             }
         }
     }
@@ -48,17 +39,18 @@ public class BeginnerAgent extends Agent {
     /**
      * Used to uncover or marka the cell located in the row and columns passed in using the AFN and AMN
      * techniques.
+     *
      * @param r the row passed in.
      * @param c the column passed in.
      */
     public void sps(int r, int c) {
-        System.out.println("Cell in SPS: ("+r+ ","+c+")");
+        System.out.println("Cell in SPS: (" + r + "," + c + ")");
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
             //TODO: be consistent with getBlocked!!tc
             if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && neighbour.getValue() != 'b') {
-                System.out.println("Nearby clue: ("+neighbour.getR() + ","+neighbour.getC()+")");
+                System.out.println("Nearby clue: (" + neighbour.getR() + "," + neighbour.getC() + ")");
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
                     System.out.println("UNCOVER CELl");
@@ -79,9 +71,11 @@ public class BeginnerAgent extends Agent {
     }
 
     //TODO: check comments again!! was not careful the first time writing them.
+
     /**
      * The AFN technique is used to determine if its safe to uncover the cell
      * based on the neighbours of its neighbour passed in.
+     *
      * @param cell the neighbouring cell being currently examined.
      * @return true if all the mines were already found
      */
@@ -95,7 +89,7 @@ public class BeginnerAgent extends Agent {
             }
         }
         int clue = cell.getValueInt();
-        System.out.println("\nAFN("+cell.getR()+","+cell.getC()+"): is clue ("+clue+") == minesCount (" + minesCount+") ?");
+        System.out.println("\nAFN(" + cell.getR() + "," + cell.getC() + "): is clue (" + clue + ") == minesCount (" + minesCount + ") ?");
         System.out.println(clue == minesCount);
         return (clue == minesCount);
     }
@@ -103,6 +97,7 @@ public class BeginnerAgent extends Agent {
     /**
      * The AMN technique is used to mark cells where we think there might
      * be a mine.
+     *
      * @param cell the neighbouring cell being currently examined.
      * @return true if
      */
@@ -123,7 +118,7 @@ public class BeginnerAgent extends Agent {
         }
 
         int clue = cell.getValueInt(); // make the clue being an integer.
-        System.out.println("\nAMN("+cell.getR()+","+cell.getC()+"): is coveredCount ("+coveredCount +") == clue (" + clue + ") - minesCount (" + minesCount+") ?");
+        System.out.println("\nAMN(" + cell.getR() + "," + cell.getC() + "): is coveredCount (" + coveredCount + ") == clue (" + clue + ") - minesCount (" + minesCount + ") ?");
         System.out.println(coveredCount == clue - minesCount);
         return (coveredCount == clue - minesCount);
     }

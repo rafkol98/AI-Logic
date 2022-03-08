@@ -34,7 +34,19 @@ public abstract class Agent {
      */
     public void solve() {
 
-        probe(); // call abstract class.
+        uncover(0, 0);
+        uncover(getCentreCell().getR(), getCentreCell().getC());
+        printAgentKnownWorld(false); // print the known world by the agent.
+        // While there are cells that are covered, continue to look for inferences.
+        while (!getCovered().isEmpty()) {
+            probe(); // call abstract class.
+
+            if (counter >= getRowSize() * getColumnSize()) {
+                printFinal(0);
+            }
+        }
+
+
 
         // if solution is not found, then print not terminated output.
         if (!solutionFound) {
