@@ -418,7 +418,7 @@ public abstract class Agent {
      */
     public void worldChangedOuput() {
         // if the game is won, print final output.
-        if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size())) {
+        if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size(), agentNo)) {
             solutionFound = true;
             printFinal(1); // prints final output and terminates the program.
         } else {

@@ -15,12 +15,9 @@ public class IntermediateAgent extends BeginnerAgent {
     public final String OR = "|";
     public final String NOT = "~";
 
-    boolean logicInference = false;
-
     public IntermediateAgent(char[][] board, boolean verbose, int agentNo) {
         super(board, verbose, agentNo);
     }
-
 
     @Override
     public void probe() {
@@ -58,12 +55,11 @@ public class IntermediateAgent extends BeginnerAgent {
 
         String kbu = createKBU(cells);  // create KBU.
 
-        if (proveMineOrFree(cell, kbu, true)) {
-            System.out.println("Mine");
-        }
-        // determine for each covered cell whether they contain a mine or not.)
-        else if (proveMineOrFree(cell, kbu, false)) {
-            System.out.println("Free");
+        // determine if passed in cell is a mine or not.
+        if (proveMineOrFree(cell, kbu, true));
+        // Otherwise try to prove that cell is free.
+        else {
+            proveMineOrFree(cell, kbu, false);
         }
     }
 
@@ -129,7 +125,7 @@ public class IntermediateAgent extends BeginnerAgent {
         }
 
         tempKBU = kbu + entailment;
-        System.out.println(tempKBU);
+        System.out.println("\n\n"+tempKBU);
 
         try {
             Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
@@ -224,7 +220,7 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     public String getLogic(Cell cell) {
         String logicOptions = "";
-        System.out.println("LOGIC FOR: " + cell.getR() + " " + cell.getC());
+//        System.out.println("LOGIC FOR: " + cell.getR() + " " + cell.getC());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
@@ -232,9 +228,6 @@ public class IntermediateAgent extends BeginnerAgent {
         // get number of mines not marked yet.
         int remainingMines = cell.getValueInt() - numberOfMarkedMinesNeighbours;
         ArrayList<ArrayList<Cell>> minesPosSets = minesPossibleSets(coveredNeighbours, remainingMines);
-
-//        System.out.println("minesPosSets "+minesPosSets);
-//        System.out.println("coveredNeighbours "+coveredNeighbours);
 
         if (minesPosSets.size() > 0) {
             // Initialise logic connectors.
@@ -251,18 +244,13 @@ public class IntermediateAgent extends BeginnerAgent {
                     logicOptions += connectOptions;
                 }
 
-                //TODO: piani ta akalifta tou protou set. dame je kamni sindiasmous.
-
                 // Iterate through the covered neighbours, to add inner element combinations.
                 for (int x = 0; x < coveredNeighbours.size(); x++) {
                     Cell neighbour = coveredNeighbours.get(x); // get neighbour.
-//                    System.out.println("-- covered neighbour -- "+ neighbour.toString());
-
                     // Connect the different options with an AND (if not the beginning).
                     if (x != 0) {
                         logicOptions += andInner;
                     }
-//                    System.out.println("DOES "+minesPosSets.get(i)+" CONTAIN "+ neighbour+" ? \n");
                     // Check if the current set does not contain neighbour. If not then append the NOT symbol.
                     if (!minesPosSets.get(i).contains(neighbour)) {
                         logicOptions += NOT;
@@ -271,13 +259,9 @@ public class IntermediateAgent extends BeginnerAgent {
                     logicOptions += "M" + neighbour.getR() + neighbour.getC();
                 }
                 logicOptions += ")";
-
-//                System.out.println(logicOptions +" \n\n");
             }
             logicOptions += ")";
         }
-
-//        System.out.println(logicOptions+"\n\n");
         return logicOptions;
     }
 
@@ -291,11 +275,12 @@ public class IntermediateAgent extends BeginnerAgent {
     public boolean uncoverCell(boolean entailment, Cell cell) {
         // if result equals FALSE, then the cell is safe, uncover.
         if (!entailment) {
+            System.out.println("UNCOVER CELL!\n");
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
-            logicInference = true;
             return true;
         }
+        System.out.println("Cell was not uncovered - not a danger. \n");
         return false;
     }
 
@@ -311,9 +296,10 @@ public class IntermediateAgent extends BeginnerAgent {
         if (!entailment) {
             markCell(cell.getR(), cell.getC()); // mark cell.
             worldChangedOuput();
-            logicInference = true;
+            System.out.println("MARK CELL!!");
             return true;
         }
+        System.out.println("Cell was not marked - not proven danger. \n");
         return false;
     }
 

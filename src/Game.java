@@ -124,17 +124,25 @@ public class Game {
      * @param markedMines  the number of cells marked as mines.
      * @return true if the game is won, false otherwise.
      */
-    public boolean isGameWon(int numberProbed, int markedMines) {
+    public boolean isGameWon(int numberProbed, int markedMines, int agentNo) {
         int numberBlocked = getBlockedCells().size();
         int numberCellsInBoard = getBoardRowSize() * getBoardColumnSize();
 
-        // if the number of cells probed plus number of blocked + the total number of mines
-        // is equal to the number of cells in the board, then it means that the agent won
-        // as they uncovered every cell that is not a mine.
-        if ((numberProbed + numberBlocked + markedMines) == numberCellsInBoard) {
-            return true;
+        // If its the first agent then use getTotalNumberOfMines.
+        if (agentNo == 1) {
+            // if all but M cells are probed without a game over, the agent wins the game.
+            if ((numberProbed + numberBlocked) == numberCellsInBoard - getTotalNumberMines()) {
+                return true;
+            }
+        } else if (markedMines == getTotalNumberMines()) {
+            // if the number of cells probed plus number of blocked + the total number of mines
+            // is equal to the number of cells in the board, then it means that the agent won
+            // as they uncovered every cell that is not a mine.
+            if ((numberProbed + numberBlocked + markedMines) == numberCellsInBoard) {
+                return true;
+            }
         }
-        
+
         return false;
     }
 

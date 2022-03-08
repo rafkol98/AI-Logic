@@ -101,14 +101,30 @@ public class Cell {
         return value;
     }
 
-    public int getValueInt() {
-        return Integer.parseInt(String.valueOf(getValue()));
-    }
-
+    /**
+     * Set/update the value of a cell.
+     *
+     * @param value cell's new value.
+     */
     public void setValue(char value) {
         this.value = value;
     }
 
+    /**
+     * Get the value of the cell as integer.
+     *
+     * @return value as integer.
+     */
+    public int getValueInt() {
+        return Integer.parseInt(String.valueOf(getValue()));
+    }
+
+    /**
+     * Check to test if two cells are the same.
+     *
+     * @param o the cell being compared to.
+     * @return true if the same, false otherwise.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,13 +133,23 @@ public class Cell {
         return r == cell.r && c == cell.c;
     }
 
+    /**
+     * Hashcode used to determine equality.
+     *
+     * @return cell's hash value.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(r, c);
     }
 
+    /**
+     * Return cell information as string. USED FOR DEBUG PURPOSES.
+     *
+     * @return cell's information as string.
+     */
     @Override
     public String toString() {
-        return "Cell{" + r + "," + c +'}';
+        return "Cell{" + r + "," + c + '}';
     }
 }

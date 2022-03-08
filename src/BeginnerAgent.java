@@ -45,17 +45,15 @@ public class BeginnerAgent extends Agent {
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
-            //TODO: be consistent with getBlocked!!tc
-            if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && neighbour.getValue() != 'b') {
-                System.out.println("Nearby clue: (" + neighbour.getR() + "," + neighbour.getC() + ")");
+            if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && !getBlocked().contains(neighbour)) {
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
-                    System.out.println("UNCOVER CELl");
+//                    System.out.println("UNCOVER CELl");
                     uncover(r, c); // uncover cell.
                     worldChangedOuput();
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
-                    System.out.println("MARK CELL!");
+//                    System.out.println("MARK CELL!");
                     markCell(r, c);
                     worldChangedOuput();
                     break;
@@ -75,7 +73,8 @@ public class BeginnerAgent extends Agent {
      */
     private boolean allFreeNeighbours(Cell cell) {
         int minesCount = 0;
-
+        // iterate through the neighbours of the passed in cell and count the
+        // neighbours marked as mines.
         ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.
         for (Cell neighbour : neighboursOfCell) {
             if (neighbour.getValue() == '*') {
@@ -83,8 +82,6 @@ public class BeginnerAgent extends Agent {
             }
         }
         int clue = cell.getValueInt();
-//        System.out.println("\nAFN(" + cell.getR() + "," + cell.getC() + "): is clue (" + clue + ") == minesCount (" + minesCount + ") ?");
-//        System.out.println(clue == minesCount);
         return (clue == minesCount);
     }
 
@@ -102,7 +99,7 @@ public class BeginnerAgent extends Agent {
         ArrayList<Cell> neighboursOfCell = getAdjacentNeighbours(cell.getR(), cell.getC()); // Get the adjacent neighbours of the cell.
 
         // iterate through the neighbours of the passed in cell and count the
-        // number of covered cells and the ones containing mines.
+        // number of covered cells and the ones marked as mines.
         for (Cell neighbour : neighboursOfCell) {
             if (neighbour.getValue() == '*') {
                 minesCount++;
@@ -112,8 +109,6 @@ public class BeginnerAgent extends Agent {
         }
 
         int clue = cell.getValueInt(); // make the clue being an integer.
-//        System.out.println("\nAMN(" + cell.getR() + "," + cell.getC() + "): is coveredCount (" + coveredCount + ") == clue (" + clue + ") - minesCount (" + minesCount + ") ?");
-//        System.out.println(coveredCount == clue - minesCount);
         return (coveredCount == clue - minesCount);
     }
 

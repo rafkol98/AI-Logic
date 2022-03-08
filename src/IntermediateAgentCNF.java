@@ -39,8 +39,9 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
         String tempKBU = kbu + entailment; // add entailment to the KBU.
 
-        ArrayList<int[]> clausesDimacs = dimacs(tempKBU); // get clauses in arrays of ints - dimacs format.
+        System.out.println(tempKBU);
 
+        ArrayList<int[]> clausesDimacs = dimacs(tempKBU); // get clauses in arrays of ints - dimacs format.
 
         // Create solver.
         ISolver solver = SolverFactory.newDefault();
@@ -50,8 +51,10 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         try {
             // Add clauses to the solver.
             for (int[] clause : clausesDimacs) {
+                System.out.println(Arrays.toString(Arrays.stream(clause).toArray()));
                 solver.addClause(new VecInt(clause));
             }
+            System.out.println("\n\n END");
 
             IProblem problem = solver;
 
@@ -71,7 +74,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     }
 
     /**
-     * Convert KBU into dimacs format clauses (in an arraylist of ints).
+     * Convert KBU into DIMACS format clauses (in an arraylist of ints).
      *
      * @param kbu
      * @return
@@ -100,6 +103,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             }
             clauses.add(inner.stream().mapToInt(i -> i).toArray());  // Add the current clause in the clauses ArrayList.
         }
+        System.out.println(clauses);
         return clauses;
     }
 
@@ -112,7 +116,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     public String replace(String kbu) {
         // Get a map containing the integer representation of each proposition.
         HashMap<String, Integer> map = mapPropToInteger(kbu, "M[0-9][0-9]");
-
+        System.out.println(map);
         String updatedKBU = kbu;
 
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
@@ -121,6 +125,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             // replace not with minus sign.
             updatedKBU = updatedKBU.replaceAll("~", "-");
         }
+        System.out.println(updatedKBU);
         return updatedKBU;
     }
 
@@ -177,6 +182,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             logicOptions += atMost + AND + " " + atLeast;
         } else if (atLeast.length() > 0) {
             logicOptions += atLeast;
+        } else if (atMost.length() > 0) {
+            logicOptions += atMost;
         }
 
         return logicOptions;
@@ -207,13 +214,14 @@ public class IntermediateAgentCNF extends IntermediateAgent {
                 logicOptions += "(";
                 String clause = "";
                 for (int x = 0; x < set.size(); x++) {
+                    // if atMost then append NOT.
                     if (most) {
                         clause += NOT + "M" + set.get(x).getR() + set.get(x).getC();
                     } else {
                         clause += "M" + set.get(x).getR() + set.get(x).getC();
                     }
 
-
+                    // connect literals.
                     if (x != (set.size() - 1)) {
                         clause += " " + OR + " ";
                     }
