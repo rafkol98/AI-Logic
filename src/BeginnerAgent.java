@@ -20,14 +20,27 @@ public class BeginnerAgent extends Agent {
         uncover(0, 0);
         uncover(getCentreCell().getR(), getCentreCell().getC());
         printAgentKnownWorld(false); // print the known world by the agent.
-//        sps();
-        for (int r = 0; r < getKnownWorld().length; r++) {
-            for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                // if cell is covered check its adjacent neighbours.
-                if (getCovered().contains(getKnownWorld()[r][c])) {
-                    System.out.println("r"+r+ " c"+c);
-                    sps(r, c);
+        // While there are cells that are covered, continue to look for inferences.
+        while (!getCovered().isEmpty()) {
+            for (int r = 0; r < getKnownWorld().length; r++) {
+                for (int c = 0; c < getKnownWorld()[0].length; c++) {
+                    Cell cell = getKnownWorld()[r][c];
+
+                    // if cell is covered check its adjacent neighbours.
+                    if (getCovered().contains(cell)) {
+                        System.out.println("r" + r + " c" + c);
+                        sps(r, c);
+                    }
+
+                    // if the cell is still covered (no changes), then increment counter.
+                    if (getCovered().contains(cell)) {
+                        counter++;
+                    }
                 }
+            }
+
+            if (counter >= getRowSize() * getColumnSize()) {
+                printFinal(0);
             }
         }
     }
@@ -82,7 +95,7 @@ public class BeginnerAgent extends Agent {
             }
         }
         int clue = cell.getValueInt();
-        System.out.println("\nAFN: is clue ("+clue+") == minesCount (" + minesCount+") ?");
+        System.out.println("\nAFN("+cell.getR()+","+cell.getC()+"): is clue ("+clue+") == minesCount (" + minesCount+") ?");
         System.out.println(clue == minesCount);
         return (clue == minesCount);
     }
@@ -110,7 +123,7 @@ public class BeginnerAgent extends Agent {
         }
 
         int clue = cell.getValueInt(); // make the clue being an integer.
-        System.out.println("\nAMN: is coveredCount ("+coveredCount +") == clue (" + clue + ") minesCount (" + minesCount+") ?");
+        System.out.println("\nAMN("+cell.getR()+","+cell.getC()+"): is coveredCount ("+coveredCount +") == clue (" + clue + ") - minesCount (" + minesCount+") ?");
         System.out.println(coveredCount == clue - minesCount);
         return (coveredCount == clue - minesCount);
     }
