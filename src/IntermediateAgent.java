@@ -17,8 +17,8 @@ public class IntermediateAgent extends BeginnerAgent {
 
     boolean logicInference = false;
 
-    public IntermediateAgent(char[][] board, boolean verbose) {
-        super(board, verbose);
+    public IntermediateAgent(char[][] board, boolean verbose, int agentNo) {
+        super(board, verbose, agentNo);
     }
 
 
@@ -57,7 +57,6 @@ public class IntermediateAgent extends BeginnerAgent {
         ArrayList<Cell> cells = getSuitableCells();
 
         String kbu = createKBU(cells);  // create KBU.
-        System.out.println(kbu);
 
         if (proveMineOrFree(cell, kbu, true)) {
             System.out.println("Mine");

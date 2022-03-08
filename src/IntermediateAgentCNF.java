@@ -14,8 +14,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
     final int MAXVAR = getRowSize() * getColumnSize(); // theoretically the maximum number of variables is equal to the area of the board.
 
-    public IntermediateAgentCNF(char[][] board, boolean verbose) {
-        super(board, verbose);
+    public IntermediateAgentCNF(char[][] board, boolean verbose, int agentNo) {
+        super(board, verbose, agentNo);
     }
 
     /**

@@ -15,13 +15,15 @@ public abstract class Agent {
     private int numberOfMines;
     private ArrayList<Cell> uncovered, markedMines;
     private int rowSize, columnSize;
+    private int agentNo;
 
     //TODO: change its name.
     int counter = 0;
 
 
-    public Agent(char[][] board, boolean verbose) {
+    public Agent(char[][] board, boolean verbose, int agentNo) {
         this.verbose = verbose;
+        this.agentNo = agentNo;
         game = new Game(board);
         uncovered = new ArrayList<>();
         markedMines = new ArrayList<>();
@@ -33,20 +35,23 @@ public abstract class Agent {
      * Solve the game.
      */
     public void solve() {
+        // if its not the basicAgent, then uncover both safe cells and then execute while covered cells
+        // are not empty.
+        if (agentNo != 1) {
+            uncover(0, 0);
+            uncover(getCentreCell().getR(), getCentreCell().getC());
+            printAgentKnownWorld(false); // print the known world by the agent.
+            // While there are cells that are covered, continue to look for inferences.
+            while (!getCovered().isEmpty()) {
+                probe(); // call abstract class.
 
-        uncover(0, 0);
-        uncover(getCentreCell().getR(), getCentreCell().getC());
-        printAgentKnownWorld(false); // print the known world by the agent.
-        // While there are cells that are covered, continue to look for inferences.
-        while (!getCovered().isEmpty()) {
-            probe(); // call abstract class.
-
-            if (counter >= getRowSize() * getColumnSize()) {
-                printFinal(0);
+                if (counter >= getRowSize() * getColumnSize()) {
+                    printFinal(0);
+                }
             }
+        } else {
+            probe();
         }
-
-
 
         // if solution is not found, then print not terminated output.
         if (!solutionFound) {
@@ -413,7 +418,7 @@ public abstract class Agent {
      */
     public void worldChangedOuput() {
         // if the game is won, print final output.
-        if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size(), 2)) {
+        if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size())) {
             solutionFound = true;
             printFinal(1); // prints final output and terminates the program.
         } else {

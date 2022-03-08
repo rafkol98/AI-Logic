@@ -6,6 +6,7 @@ public class Game {
 
     /**
      * Create a new Game instance.
+     *
      * @param boardIn
      */
     public Game(char[][] boardIn) {
@@ -117,32 +118,23 @@ public class Game {
 
     /**
      * Method used to determine if the agent won the game.
+     * Game won is determined by the correct number of probed cells.
      *
      * @param numberProbed the number of cells probed/uncovered.
      * @param markedMines  the number of cells marked as mines.
-     * @param agentNo      the level of the agent (e.g. Basic, Beginner, Intermediate)
      * @return true if the game is won, false otherwise.
      */
-    public boolean isGameWon(int numberProbed, int markedMines, int agentNo) {
+    public boolean isGameWon(int numberProbed, int markedMines) {
         int numberBlocked = getBlockedCells().size();
         int numberCellsInBoard = getBoardRowSize() * getBoardColumnSize();
 
-        // If its the first agent then use getTotalNumberOfMines.
-        if (agentNo == 1) {
-            // if all but M cells are probed without a game over, the agent wins the game.
-            if ((numberProbed + numberBlocked) == numberCellsInBoard - getTotalNumberMines()) {
-                return true;
-            }
-        } else if (markedMines == getTotalNumberMines()) {
-            // if the number of cells probed plus number of blocked + the total number of mines
-            // is equal to the number of cells in the board, then it means that the agent won
-            // as they uncovered every cell that is not a mine.
-            if ((numberProbed + numberBlocked + markedMines) == numberCellsInBoard) {
-                return true;
-            }
+        // if the number of cells probed plus number of blocked + the total number of mines
+        // is equal to the number of cells in the board, then it means that the agent won
+        // as they uncovered every cell that is not a mine.
+        if ((numberProbed + numberBlocked + markedMines) == numberCellsInBoard) {
+            return true;
         }
-
-
+        
         return false;
     }
 

@@ -20,13 +20,13 @@ public class A2main {
 		Agent agent;
 		switch (args[0]) {
 		case "P1":
-			agent = new BasicAgent(board, verbose);
+			agent = new BasicAgent(board, verbose,1);
 		case "P2":
-			agent = new BeginnerAgent(board, verbose);
+			agent = new BeginnerAgent(board, verbose,2);
 		case "P3":
-			agent = new IntermediateAgent(board, verbose);
+			agent = new IntermediateAgent(board, verbose,3);
 		case "P4":
-			agent = new IntermediateAgentCNF(board, verbose);
+			agent = new IntermediateAgentCNF(board, verbose,4);
 		case "P5":
 			//TODO: Part 5
 		}

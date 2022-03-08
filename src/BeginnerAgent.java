@@ -2,12 +2,9 @@ import java.util.ArrayList;
 
 public class BeginnerAgent extends Agent {
 
-    public BeginnerAgent(char[][] board, boolean verbose) {
-        super(board, verbose);
+    public BeginnerAgent(char[][] board, boolean verbose, int agentNo) {
+        super(board, verbose, agentNo);
     }
-
-//    boolean change = false;
-
 
     @Override
     public void alternative(Cell cell) {
@@ -54,16 +51,13 @@ public class BeginnerAgent extends Agent {
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
                     System.out.println("UNCOVER CELl");
-//                    System.out.println("AFN "+r+" , "+c);
                     uncover(r, c); // uncover cell.
                     worldChangedOuput();
-//                    change = true;
                     break;
                 } else if (allMarkedNeighbours(neighbour)) {
                     System.out.println("MARK CELL!");
                     markCell(r, c);
                     worldChangedOuput();
-//                    change = true;
                     break;
                 }
             }
@@ -89,8 +83,8 @@ public class BeginnerAgent extends Agent {
             }
         }
         int clue = cell.getValueInt();
-        System.out.println("\nAFN(" + cell.getR() + "," + cell.getC() + "): is clue (" + clue + ") == minesCount (" + minesCount + ") ?");
-        System.out.println(clue == minesCount);
+//        System.out.println("\nAFN(" + cell.getR() + "," + cell.getC() + "): is clue (" + clue + ") == minesCount (" + minesCount + ") ?");
+//        System.out.println(clue == minesCount);
         return (clue == minesCount);
     }
 
@@ -118,8 +112,8 @@ public class BeginnerAgent extends Agent {
         }
 
         int clue = cell.getValueInt(); // make the clue being an integer.
-        System.out.println("\nAMN(" + cell.getR() + "," + cell.getC() + "): is coveredCount (" + coveredCount + ") == clue (" + clue + ") - minesCount (" + minesCount + ") ?");
-        System.out.println(coveredCount == clue - minesCount);
+//        System.out.println("\nAMN(" + cell.getR() + "," + cell.getC() + "): is coveredCount (" + coveredCount + ") == clue (" + clue + ") - minesCount (" + minesCount + ") ?");
+//        System.out.println(coveredCount == clue - minesCount);
         return (coveredCount == clue - minesCount);
     }
 
