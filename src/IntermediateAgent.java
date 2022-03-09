@@ -23,14 +23,14 @@ public class IntermediateAgent extends BeginnerAgent {
     public void probe() {
         for (int r = 0; r < getKnownWorld().length; r++) {
             for (int c = 0; c < getKnownWorld()[0].length; c++) {
-                System.out.println("MESA");
                 Cell cell = getKnownWorld()[r][c];
 
-                // if
+                // first try SPS.
                 if (getCovered().contains(cell)) {
                     sps(r, c);
                 }
 
+                // If SPS does not work, try alternative - DNF (or CNF if in IntermediateAgentCNF).
                 if (getCovered().contains(cell)) {
                     alternative(cell);
                 }
@@ -49,7 +49,6 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     @Override
     public void alternative(Cell cell) {
-        System.out.println("ALTERNATIVE: " + cell);
         // DNF Encoding Technique.
         ArrayList<Cell> cells = getSuitableCells();
 
@@ -280,7 +279,6 @@ public class IntermediateAgent extends BeginnerAgent {
             worldChangedOuput();
             return true;
         }
-        System.out.println("Cell was not uncovered - not a danger. \n");
         return false;
     }
 
@@ -299,7 +297,6 @@ public class IntermediateAgent extends BeginnerAgent {
             System.out.println("MARK CELL!!");
             return true;
         }
-        System.out.println("Cell was not marked - not proven danger. \n");
         return false;
     }
 

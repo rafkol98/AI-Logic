@@ -28,7 +28,7 @@ public class A2main {
 		case "P4":
 			agent = new IntermediateAgentCNF(board, verbose,4);
 		case "P5":
-			//TODO: Part 5
+			agent = new NoFlag(board, verbose,5);
 		}
 
 		//templates to print results - copy to appropriate places

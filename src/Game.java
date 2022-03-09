@@ -128,8 +128,9 @@ public class Game {
         int numberBlocked = getBlockedCells().size();
         int numberCellsInBoard = getBoardRowSize() * getBoardColumnSize();
 
-        // If its the first agent then use getTotalNumberOfMines.
-        if (agentNo == 1) {
+        // If its the first or fifth agent (NoFlag) then the agent wins by probing the correct number of cells.
+        if (agentNo == 1 || agentNo == 5) {
+//            System.out.println("MESA dame");
             // if all but M cells are probed without a game over, the agent wins the game.
             if ((numberProbed + numberBlocked) == numberCellsInBoard - getTotalNumberMines()) {
                 return true;

@@ -21,7 +21,6 @@ public class BeginnerAgent extends Agent {
 
                 // if cell is covered check its adjacent neighbours.
                 if (getCovered().contains(cell)) {
-                    System.out.println("r" + r + " c" + c);
                     sps(r, c);
                 }
 
@@ -39,21 +38,19 @@ public class BeginnerAgent extends Agent {
      *
      * @param r the row passed in.
      * @param c the column passed in.
+     * @param noFlag flag used for the noFlag extension.
      */
     public void sps(int r, int c) {
-        System.out.println("Cell in SPS: (" + r + "," + c + ")");
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
         for (Cell neighbour : adjacent) {
             // You may probe or flag cells proven to be safe or unsafe.
             if (getUncovered().contains(neighbour) && !getMarkedMines().contains(neighbour) && !getBlocked().contains(neighbour)) {
                 // if it is safe, then uncover cell.
                 if (allFreeNeighbours(neighbour)) {
-//                    System.out.println("UNCOVER CELl");
                     uncover(r, c); // uncover cell.
                     worldChangedOuput();
                     break;
-                } else if (allMarkedNeighbours(neighbour)) {
-//                    System.out.println("MARK CELL!");
+                } else if (allMarkedNeighbours(neighbour) && getAgentNo() != 5) {
                     markCell(r, c);
                     worldChangedOuput();
                     break;

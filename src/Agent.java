@@ -32,31 +32,11 @@ public abstract class Agent {
     }
 
     /**
-     * Solve the game.
+     * Get playing agent's number.
+     * @return agent's number.
      */
-    public void solve() {
-        // if its not the basicAgent, then uncover both safe cells and then execute while covered cells
-        // are not empty.
-        if (agentNo != 1) {
-            uncover(0, 0);
-            uncover(getCentreCell().getR(), getCentreCell().getC());
-            printAgentKnownWorld(false); // print the known world by the agent.
-            // While there are cells that are covered, continue to look for inferences.
-            while (!getCovered().isEmpty()) {
-                probe(); // call abstract class.
-
-                if (counter >= getRowSize() * getColumnSize()) {
-                    printFinal(0);
-                }
-            }
-        } else {
-            probe();
-        }
-
-        // if solution is not found, then print not terminated output.
-        if (!solutionFound) {
-            printFinal(0);
-        }
+    public int getAgentNo() {
+        return agentNo;
     }
 
     /**
@@ -169,6 +149,34 @@ public abstract class Agent {
     }
 
     /**
+     * Solve the game.
+     */
+    public void solve() {
+        // if its not the basicAgent, then uncover both safe cells and then execute while covered cells
+        // are not empty.
+        if (agentNo != 1) {
+            uncover(0, 0);
+            uncover(getCentreCell().getR(), getCentreCell().getC());
+            printAgentKnownWorld(false); // print the known world by the agent.
+            // While there are cells that are covered, continue to look for inferences.
+            while (!getCovered().isEmpty()) {
+                probe(); // call abstract class.
+
+                if (counter >= getRowSize() * getColumnSize()) {
+                    printFinal(0);
+                }
+            }
+        } else {
+            probe();
+        }
+
+        // if solution is not found, then print not terminated output.
+        if (!solutionFound) {
+            printFinal(0);
+        }
+    }
+
+    /**
      * Probe the map.
      */
     public abstract void probe();
@@ -185,8 +193,8 @@ public abstract class Agent {
         if (!blocked.contains(probedCell) && !uncovered.contains(probedCell)) {
             uncovered.add(probedCell); // add the cell to the probed list.
 
+            //ask the GAME CLASS if its a mine.
             // if the probed cell is a mine, then the agent lost.
-            //TODO: change this!!! has to ask the GAME CLASS if its a bomb!!
             if (probedCell.isMine()) {
                 knownWorld[probedCell.getR()][probedCell.getC()].setValue('-');
                 printFinal(-1);
@@ -394,6 +402,13 @@ public abstract class Agent {
      * @param status flag to determine whether the agent won, lost or terminated.
      */
     public void printFinal(int status) {
+
+        if (agentNo == 5) {
+           if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size(), agentNo)) {
+               status = 1;
+           }
+        }
+
         System.out.println("Final map");
         printAgentKnownWorld(true);
         if (status == 1) {
@@ -404,12 +419,7 @@ public abstract class Agent {
             System.out.println("Result: Agent not terminated");
         }
 
-        System.out.println("COVERED LEFT DEBUG: "+getCovered().size());
-        System.out.println("\n\nTOTAL BLOCKED CELLS: "+ game.getBlockedCells().size());
-        System.out.println("TOTAL MINES NO: "+ game.getTotalNumberMines());
-
-
-        System.exit(0);
+        System.exit(0); // stop execution.
     }
 
 
