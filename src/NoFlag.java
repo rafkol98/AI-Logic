@@ -1,5 +1,11 @@
 import java.util.ArrayList;
 
+/**
+ * The NoFlag class is an EXTENSION. Same technique as IntermediateAgent but does not
+ * mark cells at all, only at the very end after proven that it won.
+ *
+ * @author: 210017984
+ */
 public class NoFlag extends IntermediateAgent{
 
     /**
@@ -28,6 +34,9 @@ public class NoFlag extends IntermediateAgent{
 
     }
 
+    /**
+     * Mark cells that were left at the end as mines. After proven that won.
+     */
     @Override
     public void markAtTheEnd() {
         // Iterate through the covered cells and mark them as mines.

@@ -8,6 +8,11 @@ import org.logicng.solvers.SATSolver;
 
 import java.util.ArrayList;
 
+/**
+ * The IntemediateAgent class. Uses logical inference in DNF.
+ *
+ * @author: 210017984
+ */
 public class IntermediateAgent extends BeginnerAgent {
 
     // Initialise logic variables.

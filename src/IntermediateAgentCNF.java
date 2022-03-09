@@ -9,7 +9,11 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+/**
+ * The IntemediateAgentCNF class. Extends IntermediateAgent and uses logical inference in CNF.
+ *
+ * @author: 210017984
+ */
 public class IntermediateAgentCNF extends IntermediateAgent {
 
     final int MAXVAR = getRowSize() * getColumnSize(); // theoretically the maximum number of variables is equal to the area of the board.
@@ -133,7 +137,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     /**
      * Maps a proposition (e.g., M10) to an integer value (e.g., 1).
      *
-     * @param kbu the KBU that its propositions will be mapped.
+     * @param kbu   the KBU that its propositions will be mapped.
      * @param regex the regular expression to map to integers.
      * @return HashMap with proposition string as key and value as its mapped integer.
      */

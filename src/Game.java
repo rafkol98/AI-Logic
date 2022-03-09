@@ -1,5 +1,10 @@
 import java.util.ArrayList;
 
+/**
+ * The Game class. Contains information about the game, used by Agent to get information.
+ *
+ * @author: 210017984
+ */
 public class Game {
 
     // initialise game board.

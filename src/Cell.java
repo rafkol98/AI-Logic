@@ -1,5 +1,10 @@
 import java.util.Objects;
 
+/**
+ * The Cell class, contains information about board's cells.
+ *
+ * @author: 210017984
+ */
 public class Cell {
 
     // Initialise variables.

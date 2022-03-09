@@ -195,7 +195,7 @@ public abstract class Agent {
      * Uncover the cell just probed.
      */
     public void uncover(int r, int c) {
-        // Ask game about the value of the same coordinates but from real board.
+        // ASK GAME about the value of the same coordinates but from real board.
         Cell probedCell = game.getCell(r, c);
         counter = 0;
 
@@ -203,7 +203,7 @@ public abstract class Agent {
         if (!blocked.contains(probedCell) && !uncovered.contains(probedCell)) {
             uncovered.add(probedCell); // add the cell to the probed list.
 
-            //ask the GAME CLASS if its a mine.
+            // ask the GAME CLASS if its a mine.
             // if the probed cell is a mine, then the agent lost.
             if (probedCell.isMine()) {
                 knownWorld[probedCell.getR()][probedCell.getC()].setValue('-');
