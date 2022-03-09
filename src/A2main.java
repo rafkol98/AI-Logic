@@ -3,42 +3,45 @@ public class A2main {
     public static void main(String[] args) {
 
         boolean verbose = false;
-        boolean time = false;
+        boolean inferences = false;
         if (args.length > 2 && args[2].equals("verbose")) {
             verbose = true; //prints agent's view at each step if true
-        } else if (args.length > 2 && args[2].equals("time")) {
-            time = true; //prints agent's view at each step if true
+        } else if (args.length > 2 && args[2].equals("inferences")) {
+            inferences = true; //prints agent's view at each step if true
         }
 
-        System.out.println("-------------------------------------------\n");
-        System.out.println("Agent " + args[0] + " plays " + args[1] + "\n");
+        try {
+            System.out.println("-------------------------------------------\n");
+            System.out.println("Agent " + args[0] + " plays " + args[1] + "\n");
 
 
-        World world = World.valueOf(args[1]);
+            World world = World.valueOf(args[1]);
 
-        char[][] board = world.map;
-        printBoard(board);
-        System.out.println("Start!");
+            char[][] board = world.map;
+            printBoard(board);
+            System.out.println("Start!");
 
-        Agent agent;
-        switch (args[0]) {
-            case "P1":
-                agent = new BasicAgent(board, verbose, 1, time);
-            case "P2":
-                agent = new BeginnerAgent(board, verbose, 2, time);
-            case "P3":
-                agent = new IntermediateAgent(board, verbose, 3, time);
-            case "P4":
-                agent = new IntermediateAgentCNF(board, verbose, 4, time);
-            case "P5":
-                agent = new NoFlag(board, verbose, 5, time);
+            Agent agent;
+            switch (args[0]) {
+                case "P1":
+                    agent = new BasicAgent(board, verbose, 1, inferences);
+                case "P2":
+                    agent = new BeginnerAgent(board, verbose, 2, inferences);
+                case "P3":
+                    agent = new IntermediateAgent(board, verbose, 3, inferences);
+                case "P4":
+                    agent = new IntermediateAgentCNF(board, verbose, 4, inferences);
+                case "P5":
+                    agent = new NoFlag(board, verbose, 5, inferences);
+            }
+
+            //templates to print results - copy to appropriate places
+            //System.out.println("\nResult: Agent alive: all solved\n");
+            //System.out.println("\nResult: Agent dead: found mine\n");
+            //System.out.println("\nResult: Agent not terminated\n");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Please select a valid configuration.");
         }
-
-        //templates to print results - copy to appropriate places
-        //System.out.println("\nResult: Agent alive: all solved\n");
-        //System.out.println("\nResult: Agent dead: found mine\n");
-        //System.out.println("\nResult: Agent not terminated\n");
-
     }
 
     //prints the board in the required format - PLEASE DO NOT MODIFY

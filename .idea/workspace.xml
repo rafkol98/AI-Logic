@@ -7,18 +7,8 @@
       <change beforePath="$PROJECT_DIR$/src/A2main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/A2main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Agent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BasicAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/BasicAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BasicAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BasicAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BeginnerAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/BeginnerAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BeginnerAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BeginnerAgent.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Game.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/Game.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/IntermediateAgent.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/IntermediateAgent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/IntermediateAgent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/IntermediateAgent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/IntermediateAgentCNF.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/IntermediateAgentCNF.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/IntermediateAgentCNF.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/IntermediateAgentCNF.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/NoFlag.class" beforeDir="false" afterPath="$PROJECT_DIR$/src/NoFlag.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/NoFlag.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/NoFlag.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

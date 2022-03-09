@@ -421,7 +421,6 @@ public abstract class Agent {
      * @param status flag to determine whether the agent won, lost or terminated.
      */
     public void printFinal(int status) {
-
         System.out.println("Final map");
         printAgentKnownWorld(true);
         if (status == 1) {
@@ -433,7 +432,6 @@ public abstract class Agent {
         }
 
         if (inferencesFlag) {
-            game.stopTimer();
             System.out.println("Inferences Required: " + countInferences);
         }
         System.exit(0); // stop execution.
@@ -447,6 +445,11 @@ public abstract class Agent {
         // if the game is won, print final output.
         if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size(), agentNo)) {
             solutionFound = true;
+
+            // if its the final agent, mark all mines at the end.
+            if (agentNo == 5) {
+                markAtTheEnd();
+            }
             printFinal(1); // prints final output and terminates the program.
         } else {
             printAgentKnownWorld(false);

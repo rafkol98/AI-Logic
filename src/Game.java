@@ -148,19 +148,4 @@ public class Game {
         return false;
     }
 
-    /**
-     * Used to start record time (time flag).
-     */
-    public void startTimer() {
-        startTime = System.currentTimeMillis();
-    }
-
-    /**
-     * Used to stop recording time (time flag).
-     */
-    public void stopTimer() {
-        long elapsedTime = System.currentTimeMillis() - startTime;
-        System.out.println("\nElapsed MilliSeconds: " + elapsedTime);
-    }
-
 }
