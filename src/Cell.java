@@ -8,8 +8,8 @@ public class Cell {
     private boolean blocked, mine;
 
     /**
-     * Create a new cell without value, passing in the row and columns. This is used for
-     * some checks to see if a cell is already contained in a list. This is done by creating a temporary
+     * Create a new cell without value, passing in the row and columns. This is used to perform
+     * checks to see if a cell is already contained in a list. This is done by creating a temporary
      * empty cell to then use the equals method to check equality with an existing cell.
      *
      * @param r the x coordinate of the cell.
@@ -35,9 +35,9 @@ public class Cell {
     }
 
     /**
-     * Set the type (mine, blocked, or normal) of the cell.
+     * Set the type (mine, blocked, or normal) of the cell depending on its value.
      *
-     * @param value
+     * @param value the value of cell.
      */
     public void setCellType(char value) {
         switch (value) {

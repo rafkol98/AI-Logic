@@ -1,7 +1,13 @@
 import java.util.ArrayList;
 
+/**
+ * The Agent class. Includes main functionality used by all other agents.
+ * @author: 210017984
+ */
 public abstract class Agent {
 
+    public boolean solutionFound = false;
+    int counter = 0; // counter determines when to stop inferring further - no more changes.
     // Initialise variables.
     private Game game;
     private boolean verbose;
@@ -11,26 +17,20 @@ public abstract class Agent {
     private ArrayList<Cell> uncovered, markedMines;
     private int rowSize, columnSize;
     private int agentNo;
-
     // Safe cells.
     private Cell topLeft;
     private Cell centreCell;
-
     // Evaluation variables.
     private boolean inferencesFlag;
     private int countInferences = 0;
-    public boolean solutionFound = false;
-
-
-    //TODO: change its name.
-    int counter = 0;
 
 
     /**
      * Create agent instance.
-     * @param board the board passed in.
-     * @param verbose whether to print every step
-     * @param agentNo the solving agent number.
+     *
+     * @param board          the board passed in.
+     * @param verbose        whether to print every step
+     * @param agentNo        the solving agent number.
      * @param inferencesFlag measure inferences required to reach goal.
      */
     public Agent(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
@@ -46,6 +46,7 @@ public abstract class Agent {
 
     /**
      * Get playing agent's number.
+     *
      * @return agent's number.
      */
     public int getAgentNo() {
@@ -84,7 +85,7 @@ public abstract class Agent {
     /**
      * Get all the covered cells.
      *
-     * @return
+     * @return the covered cells in an ArrayList.
      */
     public ArrayList<Cell> getCovered() {
         ArrayList<Cell> covered = new ArrayList<>();
@@ -101,19 +102,10 @@ public abstract class Agent {
     /**
      * Get all the cells that were marked as mines.
      *
-     * @return
+     * @return the marked mines in an ArrayList.
      */
     public ArrayList<Cell> getMarkedMines() {
         return markedMines;
-    }
-
-    /**
-     * Get the game.
-     *
-     * @return the game.
-     */
-    public Game getGame() {
-        return game;
     }
 
     /**
@@ -296,7 +288,7 @@ public abstract class Agent {
 
         ArrayList<Cell> neighbours = getAdjacentNeighbours(r, c);
         for (Cell neighbour : neighbours) {
-            if (isCellCovered(neighbour)) {
+            if (getCovered().contains(neighbour)) {
                 coveredNeighbours.add(neighbour);
             }
         }
@@ -392,27 +384,17 @@ public abstract class Agent {
 
     /**
      * Returns whether a cell is contained in a given list. Only the cell's row and columns
-     * are required. This was created to avoid creating temporary cells repeatedly throughout
+     * are required. This was created to avoid creating temporary cells repeatedly in
      * the code.
      *
      * @param r    row of the cell.
      * @param c    column of the cell.
      * @param list the list to check.
-     * @return
+     * @return true if included, false otherwise.
      */
     public boolean containInList(int r, int c, ArrayList<Cell> list) {
         Cell tempCell = new Cell(r, c);
         return list.contains(tempCell);
-    }
-
-    /**
-     * Returns true if the cell is covered (not uncovered, not blocked, and not a marked mine).
-     *
-     * @param cell
-     * @return
-     */
-    public boolean isCellCovered(Cell cell) {
-        return !getUncovered().contains(cell) && !getBlocked().contains(cell) && !getMarkedMines().contains(cell);
     }
 
     /**
@@ -431,6 +413,7 @@ public abstract class Agent {
             System.out.println("Result: Agent not terminated");
         }
 
+        // Print inferences made if inferences flag was passed in.
         if (inferencesFlag) {
             System.out.println("Inferences Required: " + countInferences);
         }
@@ -443,7 +426,7 @@ public abstract class Agent {
      */
     public void worldChangedOuput() {
         // if the game is won, print final output.
-        if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size(), agentNo)) {
+        if (game.isGameWon(getUncovered().size(), getMarkedMines().size(), agentNo)) {
             solutionFound = true;
 
             // if its the final agent, mark all mines at the end.

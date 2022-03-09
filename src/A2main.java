@@ -6,7 +6,9 @@ public class A2main {
         boolean inferences = false;
         if (args.length > 2 && args[2].equals("verbose")) {
             verbose = true; //prints agent's view at each step if true
-        } else if (args.length > 2 && args[2].equals("inferences")) {
+        }
+        // use inferences flag - count number of inferences.
+        else if (args.length > 2 && args[2].equals("inferences")) {
             inferences = true; //prints agent's view at each step if true
         }
 

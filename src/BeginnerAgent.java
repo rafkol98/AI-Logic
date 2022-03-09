@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class BeginnerAgent extends Agent {
 
     /**
-     * Create agent instance.
+     * Create BeginnerAgent instance.
      *
      * @param board   the board passed in.
      * @param verbose whether to print every step
@@ -45,8 +45,7 @@ public class BeginnerAgent extends Agent {
     }
 
     /**
-     * Used to uncover or marka the cell located in the row and columns passed in using the AFN and AMN
-     * techniques.
+     * Single-point-strategy. Uses AFN to uncover a cell and AMN to mark.
      *
      * @param r the row passed in.
      * @param c the column passed in.
@@ -62,7 +61,8 @@ public class BeginnerAgent extends Agent {
                     worldChangedOuput();
                     break;
                 }
-                // otherwise try to mark it as a cell. If agentNo == 5 then don't execute it (NoFlag strategy).
+                // otherwise try to mark it as a cell.
+                // If agentNo == 5 then don't execute it (NoFlag strategy)!!
                 else if (allMarkedNeighbours(neighbour) && getAgentNo() != 5) {
                     markCell(r, c);
                     worldChangedOuput();
@@ -71,8 +71,6 @@ public class BeginnerAgent extends Agent {
             }
         }
     }
-
-    //TODO: check comments again!! was not careful the first time writing them.
 
     /**
      * The AFN technique is used to determine if its safe to uncover the cell
@@ -100,7 +98,7 @@ public class BeginnerAgent extends Agent {
      * be a mine.
      *
      * @param cell the neighbouring cell being currently examined.
-     * @return true if
+     * @return true if covered count is equal to the clue minus the mines count.
      */
     private boolean allMarkedNeighbours(Cell cell) {
         int minesCount = 0;

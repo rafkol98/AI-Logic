@@ -27,6 +27,9 @@ public class IntermediateAgent extends BeginnerAgent {
         super(board, verbose, agentNo, inferencesFlag);
     }
 
+    /**
+     * Probe cells first using SPS and then if it cannot make an inference about a cell use SAT.
+     */
     @Override
     public void probe() {
         for (int r = 0; r < getKnownWorld().length; r++) {
@@ -73,8 +76,9 @@ public class IntermediateAgent extends BeginnerAgent {
     /**
      * Get all the cells that are uncovered but have at least one neighbour that is covered.
      * Those are the cells that we will be using inference to explore further.
-     * <p>
+     *
      * Used for Logical inference and building the KBU in both intermediate agents.
+     * @return all the suitable cells in an ArrayList.
      */
     public ArrayList<Cell> getSuitableCells() {
         ArrayList<Cell> cells = new ArrayList<>();
@@ -103,7 +107,6 @@ public class IntermediateAgent extends BeginnerAgent {
             String logicOptions = getLogic(cells.get(i));
             kbu += logicOptions; // add logic option in kbu for current cell.
 
-            //TODO: might have to do a separate function for the connectors - different for CNF.
             // Connect the logic options.
             // If its the last element, then don't add an AND sign.
             if (i != cells.size() - 1 && logicOptions.length() >= 1) {
@@ -116,6 +119,7 @@ public class IntermediateAgent extends BeginnerAgent {
 
     /**
      * Determine whether the passed in cell should be uncovered or marked as mine - using Logical Inference.
+     * @return true if there was a change.
      */
     public boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
         String entailment;
@@ -141,11 +145,11 @@ public class IntermediateAgent extends BeginnerAgent {
 
             boolean entailed = result.equals(Tristate.TRUE) ? true : false; // create a boolean variable to determine entailment.
 
-
+            // if prove mine flag is true, then try
             if (proveMine) {
-                return markCell(entailed, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                return markCell(entailed, cell); // try to mark cell - depending on the inference made by LogicNG.
             } else {
-                return uncoverCell(entailed, cell); // uncover or mark cell depending on the inference made by LogicNG.
+                return uncoverCell(entailed, cell); // try to uncover  cell - depending on the inference made by LogicNG.
             }
 
         } catch (ParserException e) {
@@ -171,13 +175,12 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
-     * TODO: improve comments - MAKE PRIVATE (MAYBE)
      * Get all the possible permutations for given covered neighbours.
      *
      * @param coveredNeighbours the covered neighbours given.
      * @return all the possible permutations
      */
-    public ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
+    private ArrayList<ArrayList<Cell>> permutations(ArrayList<Cell> coveredNeighbours) {
         ArrayList<ArrayList<Cell>> sets = new ArrayList<ArrayList<Cell>>();
 
         // When empty, return sets.
@@ -192,18 +195,16 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
-     * TODO: improve comments
      * Fill inner sets with the appropriate elements.
      *
      * @param sets              the sets to be filled.
      * @param coveredNeighbours the covered neighbours given.
      */
     private void fillInnerSets(ArrayList<ArrayList<Cell>> sets, ArrayList<Cell> coveredNeighbours) {
-        //TODO: check here mines count statement.
         Cell top = coveredNeighbours.get(0);
         ArrayList<Cell> remaining = new ArrayList<Cell>(coveredNeighbours.subList(1, coveredNeighbours.size()));
 
-        // TODO: explain RECURSIVE CALL.
+        // recursive call.
         for (ArrayList<Cell> set : permutations(remaining)) {
             ArrayList<Cell> innerSet = new ArrayList<Cell>(); // create an inner set.
 
@@ -268,11 +269,11 @@ public class IntermediateAgent extends BeginnerAgent {
     }
 
     /**
-     * TODO: improve comments
      * Uncover or mark cells, depending on the result returned by LogicNG.
      *
      * @param entailment the result returned by LogicNG.
      * @param cell       the cell to be uncovered or marked.
+     * @return true if cell was uncovered, false otherwise.
      */
     public boolean uncoverCell(boolean entailment, Cell cell) {
         // if result equals FALSE, then the cell is safe, uncover.
@@ -289,7 +290,7 @@ public class IntermediateAgent extends BeginnerAgent {
      *
      * @param entailment the result returned by LogicNG.
      * @param cell       the cell to be uncovered or marked.
-     * @return
+     * @return true if cell was marked, false otherwise.
      */
     public boolean markCell(boolean entailment, Cell cell) {
         // if result equals FALSE, then mark as danger!

@@ -2,13 +2,13 @@ import java.util.ArrayList;
 
 public class Game {
 
+    // initialise game board.
     private Cell[][] board;
-    private long startTime;
 
     /**
      * Create a new Game instance.
      *
-     * @param boardIn
+     * @param boardIn the board passed in from the configuration.
      */
     public Game(char[][] boardIn) {
         this.board = new Cell[boardIn.length][boardIn[0].length];

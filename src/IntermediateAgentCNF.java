@@ -17,9 +17,9 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     /**
      * Create agent instance.
      *
-     * @param board   the board passed in.
-     * @param verbose whether to print every step
-     * @param agentNo the solving agent number.
+     * @param board          the board passed in.
+     * @param verbose        whether to print every step
+     * @param agentNo        the solving agent number.
      * @param inferencesFlag measure inferences required to reach goal.
      */
     public IntermediateAgentCNF(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
@@ -33,6 +33,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
      * @param kbu       the knowledge base of unknowns.
      * @param proveMine flag that determines whether to try to prove cell is a mine. If false then try to prove cell
      *                  is free.
+     * @return true if there was a change.
      */
     @Override
     public boolean proveMineOrFree(Cell cell, String kbu, boolean proveMine) {
@@ -44,6 +45,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         } else {
             entailment = AND + " (M" + cell.getR() + cell.getC() + ")";
         }
+
 
         String tempKBU = kbu + entailment; // add entailment to the KBU.
 
@@ -79,8 +81,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     /**
      * Convert KBU into DIMACS format clauses (in an arraylist of ints).
      *
-     * @param kbu
-     * @return
+     * @param kbu the knowledge base of unknowns.
+     * @return ArrayList containing integer arrays in dimacs format.
      */
     public ArrayList<int[]> dimacs(String kbu) {
         // create a new Arraylist of integer arrays to store each clause.
@@ -111,8 +113,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     /**
      * Create a new KBU where each proposition is replaced by its corresponding dimacs integer encoding.
      *
-     * @param kbu
-     * @return
+     * @param kbu the knowledge base of unknowns.
+     * @return updated KBU.
      */
     public String replace(String kbu) {
         // Get a map containing the integer representation of each proposition.
@@ -131,15 +133,15 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     /**
      * Maps a proposition (e.g., M10) to an integer value (e.g., 1).
      *
-     * @param text
-     * @param regex
-     * @return
+     * @param kbu the KBU that its propositions will be mapped.
+     * @param regex the regular expression to map to integers.
+     * @return HashMap with proposition string as key and value as its mapped integer.
      */
-    public HashMap<String, Integer> mapPropToInteger(String text, String regex) {
+    public HashMap<String, Integer> mapPropToInteger(String kbu, String regex) {
 
         // Put all the elements in a set.
         HashSet<String> propositions = new HashSet<String>();
-        Matcher m = Pattern.compile("(?=(" + regex + "))").matcher(text);
+        Matcher m = Pattern.compile("(?=(" + regex + "))").matcher(kbu);
         // while there are elements matching the regex passed in, p
         while (m.find()) {
             propositions.add(m.group(1));
@@ -157,6 +159,12 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         return map;
     }
 
+    /**
+     * Get all the options available from a cell in a logic sentence - CNF format.
+     *
+     * @param cell the cell to get the logic options of.
+     * @return logical sentence as a string.
+     */
     @Override
     public String getLogic(Cell cell) {
         String logicOptions = "";
@@ -175,8 +183,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         String atMost = atMostOrLeast(atMostSet, true);
         String atLeast = atMostOrLeast(atLeastSet, false);
 
-        //TODO: retink this
-        // if the clauses are not empty.
+
+        // if the clauses are not empty use both at least and at most, act accordingly otherwise
         if (atMost.length() > 0 && atLeast.length() > 0) {
             logicOptions += atMost + AND + " " + atLeast;
         } else if (atLeast.length() > 0) {
@@ -190,14 +198,9 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
 
     /**
-     * If the most flag is true, then at least one is NOT a mine.
+     * Used as either atMmost or atLeast, depending on the most flag.
      *
-     * for all subsets given at most one is a mine. If the flag is false, then at least one is
-     * NOT a mine.
-     *
-     * For all subsets given, at least one is NOT a mine.
-     *
-     * @param possibleSets
+     * @param possibleSets the possible sets to combine in CNF.
      * @param most         if true, then use atMost otherwise use atLeast.
      * @return
      */
