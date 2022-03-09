@@ -2,8 +2,16 @@ import java.util.ArrayList;
 
 public class NoFlag extends IntermediateAgent{
 
-    public NoFlag(char[][] board, boolean verbose, int agentNo) {
-        super(board, verbose, agentNo);
+    /**
+     * Create agent instance.
+     *
+     * @param board   the board passed in.
+     * @param verbose whether to print every step
+     * @param agentNo the solving agent number.
+     * @param inferencesFlag measure inferences required to reach goal.
+     */
+    public NoFlag(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
+        super(board, verbose, agentNo, inferencesFlag);
     }
 
     /**
@@ -12,13 +20,20 @@ public class NoFlag extends IntermediateAgent{
      */
     @Override
     public void alternative(Cell cell) {
-
-        ArrayList<Cell> cells = getSuitableCells();
+        ArrayList<Cell> cells = getSuitableCells(); // get suitable cells.
 
         String kbu = createKBU(cells);  // create KBU.
 
-        // Only prove mine.
-        proveMineOrFree(cell, kbu, false);
+        proveMineOrFree(cell, kbu, false);  // Only prove cell is safe.
+
+    }
+
+    @Override
+    public void markAtTheEnd() {
+        // Iterate through the covered cells and mark them as mines.
+        for (Cell cell : getCovered()) {
+            markCell(cell.getR(), cell.getC()); // mark cell.
+        }
     }
 
 }

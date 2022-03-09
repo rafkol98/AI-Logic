@@ -15,8 +15,16 @@ public class IntermediateAgent extends BeginnerAgent {
     public final String OR = "|";
     public final String NOT = "~";
 
-    public IntermediateAgent(char[][] board, boolean verbose, int agentNo) {
-        super(board, verbose, agentNo);
+    /**
+     * Create agent instance.
+     *
+     * @param board   the board passed in.
+     * @param verbose whether to print every step
+     * @param agentNo the solving agent number.
+     * @param inferencesFlag measure inferences required to reach goal.
+     */
+    public IntermediateAgent(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
+        super(board, verbose, agentNo, inferencesFlag);
     }
 
     @Override
@@ -124,7 +132,6 @@ public class IntermediateAgent extends BeginnerAgent {
         }
 
         tempKBU = kbu + entailment;
-        System.out.println("\n\n"+tempKBU);
 
         try {
             Formula formula = p.parse(tempKBU); // parse temporary KBU (includes entailment) in a formula.
@@ -142,10 +149,7 @@ public class IntermediateAgent extends BeginnerAgent {
             }
 
         } catch (ParserException e) {
-            System.out.println(tempKBU);
-            e.getCause();
-            System.out.println(e.getMessage());
-            System.out.println("There was a problem parsing the formula passed in");
+            e.getMessage();
         }
 
         return false;
@@ -219,7 +223,6 @@ public class IntermediateAgent extends BeginnerAgent {
      */
     public String getLogic(Cell cell) {
         String logicOptions = "";
-//        System.out.println("LOGIC FOR: " + cell.getR() + " " + cell.getC());
         ArrayList<Cell> coveredNeighbours = getOnlyCoveredNeighbours(cell.getR(), cell.getC()); // get covered neighbours.
         int numberOfMarkedMinesNeighbours = getNumberOfMinesMarkedNeighbours(cell.getR(), cell.getC()); // get number of marked mines in neighbours.
 
@@ -274,7 +277,6 @@ public class IntermediateAgent extends BeginnerAgent {
     public boolean uncoverCell(boolean entailment, Cell cell) {
         // if result equals FALSE, then the cell is safe, uncover.
         if (!entailment) {
-            System.out.println("UNCOVER CELL!\n");
             uncover(cell.getR(), cell.getC()); // uncover cell.
             worldChangedOuput();
             return true;
@@ -294,7 +296,6 @@ public class IntermediateAgent extends BeginnerAgent {
         if (!entailment) {
             markCell(cell.getR(), cell.getC()); // mark cell.
             worldChangedOuput();
-            System.out.println("MARK CELL!!");
             return true;
         }
         return false;

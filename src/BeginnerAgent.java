@@ -2,13 +2,25 @@ import java.util.ArrayList;
 
 public class BeginnerAgent extends Agent {
 
-    public BeginnerAgent(char[][] board, boolean verbose, int agentNo) {
-        super(board, verbose, agentNo);
+    /**
+     * Create agent instance.
+     *
+     * @param board   the board passed in.
+     * @param verbose whether to print every step
+     * @param agentNo the solving agent number.
+     * @param inferencesFlag measure inferences required to reach goal.
+     */
+    public BeginnerAgent(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
+        super(board, verbose, agentNo, inferencesFlag);
     }
 
+    //Not used for beginner agent.
     @Override
-    public void alternative(Cell cell) {
-    }
+    public void alternative(Cell cell) {}
+
+    //Not used for beginner agent.
+    @Override
+    public void markAtTheEnd() {}
 
     /**
      * Probe cells using the Single Point Strategy.
@@ -38,7 +50,6 @@ public class BeginnerAgent extends Agent {
      *
      * @param r the row passed in.
      * @param c the column passed in.
-     * @param noFlag flag used for the noFlag extension.
      */
     public void sps(int r, int c) {
         ArrayList<Cell> adjacent = getAdjacentNeighbours(r, c);
@@ -50,7 +61,9 @@ public class BeginnerAgent extends Agent {
                     uncover(r, c); // uncover cell.
                     worldChangedOuput();
                     break;
-                } else if (allMarkedNeighbours(neighbour) && getAgentNo() != 5) {
+                }
+                // otherwise try to mark it as a cell. If agentNo == 5 then don't execute it (NoFlag strategy).
+                else if (allMarkedNeighbours(neighbour) && getAgentNo() != 5) {
                     markCell(r, c);
                     worldChangedOuput();
                     break;

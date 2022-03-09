@@ -1,13 +1,25 @@
 public class BasicAgent extends Agent{
 
-    public BasicAgent(char[][] board, boolean verbose, int agentNo) {
-        super(board, verbose, agentNo);
+
+    /**
+     * Create agent instance.
+     *
+     * @param board   the board passed in.
+     * @param verbose whether to print every step
+     * @param agentNo the solving agent number.
+     * @param inferencesFlag measure inferences required to reach goal.
+     */
+    public BasicAgent(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
+        super(board, verbose, agentNo, inferencesFlag);
     }
 
+    //Not used for basic agent.
     @Override
-    public void alternative(Cell cell) {
+    public void alternative(Cell cell) {}
 
-    }
+    //Not used for basic agent.
+    @Override
+    public void markAtTheEnd() {}
 
     /**
      * Probe in the cells in order.

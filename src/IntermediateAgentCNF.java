@@ -14,8 +14,16 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
     final int MAXVAR = getRowSize() * getColumnSize(); // theoretically the maximum number of variables is equal to the area of the board.
 
-    public IntermediateAgentCNF(char[][] board, boolean verbose, int agentNo) {
-        super(board, verbose, agentNo);
+    /**
+     * Create agent instance.
+     *
+     * @param board   the board passed in.
+     * @param verbose whether to print every step
+     * @param agentNo the solving agent number.
+     * @param inferencesFlag measure inferences required to reach goal.
+     */
+    public IntermediateAgentCNF(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
+        super(board, verbose, agentNo, inferencesFlag);
     }
 
     /**
@@ -39,8 +47,6 @@ public class IntermediateAgentCNF extends IntermediateAgent {
 
         String tempKBU = kbu + entailment; // add entailment to the KBU.
 
-        System.out.println(tempKBU);
-
         ArrayList<int[]> clausesDimacs = dimacs(tempKBU); // get clauses in arrays of ints - dimacs format.
 
         // Create solver.
@@ -51,10 +57,8 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         try {
             // Add clauses to the solver.
             for (int[] clause : clausesDimacs) {
-                System.out.println(Arrays.toString(Arrays.stream(clause).toArray()));
                 solver.addClause(new VecInt(clause));
             }
-            System.out.println("\n\n END");
 
             IProblem problem = solver;
 
@@ -66,8 +70,7 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             }
 
         } catch (TimeoutException | ContradictionException e) {
-            e.printStackTrace();
-            System.out.println("There was a problem: " + e.getMessage());
+            e.getMessage();
         }
 
         return false;
@@ -82,7 +85,6 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     public ArrayList<int[]> dimacs(String kbu) {
         // create a new Arraylist of integer arrays to store each clause.
         ArrayList<int[]> clauses = new ArrayList<>();
-        System.out.println("\n\n" + kbu);
 
         // Replace the propositions in the kbu with integers.
         kbu = replace(kbu);
@@ -103,7 +105,6 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             }
             clauses.add(inner.stream().mapToInt(i -> i).toArray());  // Add the current clause in the clauses ArrayList.
         }
-        System.out.println(clauses);
         return clauses;
     }
 
@@ -116,7 +117,6 @@ public class IntermediateAgentCNF extends IntermediateAgent {
     public String replace(String kbu) {
         // Get a map containing the integer representation of each proposition.
         HashMap<String, Integer> map = mapPropToInteger(kbu, "M[0-9][0-9]");
-        System.out.println(map);
         String updatedKBU = kbu;
 
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
@@ -125,7 +125,6 @@ public class IntermediateAgentCNF extends IntermediateAgent {
             // replace not with minus sign.
             updatedKBU = updatedKBU.replaceAll("~", "-");
         }
-        System.out.println(updatedKBU);
         return updatedKBU;
     }
 
@@ -208,7 +207,6 @@ public class IntermediateAgentCNF extends IntermediateAgent {
         for (int i = 0; i < possibleSets.size(); i++) {
             ArrayList<Cell> set = possibleSets.get(i);
 
-            System.out.println("SET SIZE:" + set.size());
             if (set.size() > 0) {
                 // Iterate through the set and create disjunctions.
                 logicOptions += "(";

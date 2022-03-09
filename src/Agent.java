@@ -2,31 +2,44 @@ import java.util.ArrayList;
 
 public abstract class Agent {
 
-    //TODO: FIX COMMENTS!
-
     // Initialise variables.
-    public boolean solutionFound = false;
     private Game game;
     private boolean verbose;
     private Cell[][] knownWorld;
     private ArrayList<Cell> blocked; // the agent must know the blocked cells.
-    private Cell topLeft;
-    private Cell centreCell;
     private int numberOfMines;
     private ArrayList<Cell> uncovered, markedMines;
     private int rowSize, columnSize;
     private int agentNo;
 
+    // Safe cells.
+    private Cell topLeft;
+    private Cell centreCell;
+
+    // Evaluation variables.
+    private boolean inferencesFlag;
+    private int countInferences = 0;
+    public boolean solutionFound = false;
+
+
     //TODO: change its name.
     int counter = 0;
 
 
-    public Agent(char[][] board, boolean verbose, int agentNo) {
+    /**
+     * Create agent instance.
+     * @param board the board passed in.
+     * @param verbose whether to print every step
+     * @param agentNo the solving agent number.
+     * @param inferencesFlag measure inferences required to reach goal.
+     */
+    public Agent(char[][] board, boolean verbose, int agentNo, boolean inferencesFlag) {
         this.verbose = verbose;
         this.agentNo = agentNo;
         game = new Game(board);
         uncovered = new ArrayList<>();
         markedMines = new ArrayList<>();
+        this.inferencesFlag = inferencesFlag;
         initialiseKnowledgeBase();
         solve();
     }
@@ -44,6 +57,11 @@ public abstract class Agent {
      * This alternative approach is different for each level of agent.
      */
     public abstract void alternative(Cell cell);
+
+    /**
+     * Mark the remaining cells (only used for NoFlag agent).
+     */
+    public abstract void markAtTheEnd();
 
     /**
      * Get known world of the Agent.
@@ -369,6 +387,7 @@ public abstract class Agent {
             }
             System.out.println();
         }
+        countInferences++;
     }
 
     /**
@@ -403,12 +422,6 @@ public abstract class Agent {
      */
     public void printFinal(int status) {
 
-        if (agentNo == 5) {
-           if (getGame().isGameWon(getUncovered().size(), getMarkedMines().size(), agentNo)) {
-               status = 1;
-           }
-        }
-
         System.out.println("Final map");
         printAgentKnownWorld(true);
         if (status == 1) {
@@ -419,6 +432,10 @@ public abstract class Agent {
             System.out.println("Result: Agent not terminated");
         }
 
+        if (inferencesFlag) {
+            game.stopTimer();
+            System.out.println("Inferences Required: " + countInferences);
+        }
         System.exit(0); // stop execution.
     }
 
