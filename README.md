@@ -1,7 +1,7 @@
 # AI-Logic
 The Obscured Sweeper game is inspired by the well-known Mineswepeer computer game. Similar to the classic Minesweeper, an Obscured Sweeper world is a grid of N × N cells, and M mines are scattered among the cells. However, some of the cells are “blocked”. A blocked cell is a cell not containing mines which does not give any clue to the number of neighbouring mines, and therefore cannot be probed.
 
-This project is the creation of an autonomous logical agent that that is able to perceive facts about the world it occupies, and act accordingly using logic. Its goal is to uncover all cells but the mines - and therefore win the game.
+This project involves the creation of an autonomous logical agent that that is able to perceive facts about the world it occupies, and act accordingly using logic. The agent's goal is to uncover all cells but the mines - and therefore win the game.
 
 
 **Running Instructions**
