@@ -15,4 +15,4 @@ The first argument specified the logical agent to be used. The ID argument is us
  Example:
 Run the program using IntermediateAgent (P3), on the TEST4 map. Print the output after each inference (verbose).
   
-./playSweeper.sh P3 TEST4 verbose
+`./playSweeper.sh P3 TEST4 verbose`
